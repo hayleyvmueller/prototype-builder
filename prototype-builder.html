@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProtoFlow</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d0e14; overflow: hidden; }
+    @keyframes fadeIn  { from { opacity:0; transform:translateY(6px);  } to { opacity:1; transform:none; } }
+    @keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(10px) scale(.96); } to { opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }
+    @keyframes autoplay-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(59,130,246,.6);} 60%{box-shadow:0 0 0 8px rgba(59,130,246,0);} }
+    .fade-in  { animation: fadeIn  .18s ease-out; }
+    .toast-in { animation: toastIn .22s ease-out; }
+    input,select,textarea { outline:none; }
+    ::-webkit-scrollbar       { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(255,255,255,.12); border-radius:3px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback, useMemo } = React;
+const icons = lucide;
+
+/* ─── Icon ─────────────────────────────────────────────────────── */
+function Icon({ name, size = 16, style = {} }) {
+  const el = useRef(null);
+  useEffect(() => {
+    if (!el.current || !icons[name]) return;
+    el.current.innerHTML = '';
+    const svg = icons.createElement(icons[name]);
+    svg.setAttribute('width', size);
+    svg.setAttribute('height', size);
+    el.current.appendChild(svg);
+  }, [name, size]);
+  return <span ref={el} style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0, ...style }} />;
+}
+
+/* ─── Helpers ───────────────────────────────────────────────────── */
+let _n = 1;
+const uid  = () => String(_n++);
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+function useSize(ref) {
+  const [sz, setSz] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    if (!ref.current) return;
+    const ro = new ResizeObserver(([e]) => setSz({ w: e.contentRect.width, h: e.contentRect.height }));
+    ro.observe(ref.current);
+    return () => ro.disconnect();
+  }, []);
+  return sz;
+}
+
+function fitScale(cw, ch, fw, fh, pad = 40) {
+  if (!cw || !ch || !fw || !fh) return 1;
+  return Math.min((cw - pad * 2) / fw, (ch - pad * 2) / fh, 1);
+}
+
+/* ─── Transition types ──────────────────────────────────────────── */
+const TRANSITIONS = [
+  { value: 'instant',     label: 'Instant',     icon: 'Zap' },
+  { value: 'dissolve',    label: 'Dissolve',    icon: 'Layers' },
+  { value: 'slide-left',  label: 'Slide Left',  icon: 'ArrowLeft' },
+  { value: 'slide-right', label: 'Slide Right', icon: 'ArrowRight' },
+  { value: 'slide-up',    label: 'Slide Up',    icon: 'ArrowUp' },
+  { value: 'slide-down',  label: 'Slide Down',  icon: 'ArrowDown' },
+];
+
+function getOutStyle(t) {
+  if (!t) return {};
+  const e = t.phase === 'end';
+  switch (t.type) {
+    case 'dissolve':     return { opacity: e ? 0 : 1 };
+    case 'slide-left':   return { transform: e ? 'translateX(-100%)' : 'translateX(0)' };
+    case 'slide-right':  return { transform: e ? 'translateX(100%)'  : 'translateX(0)' };
+    case 'slide-up':     return { transform: e ? 'translateY(-100%)' : 'translateY(0)' };
+    case 'slide-down':   return { transform: e ? 'translateY(100%)'  : 'translateY(0)' };
+    default:             return { opacity: e ? 0 : 1 };
+  }
+}
+
+function getInStyle(t) {
+  if (!t) return {};
+  const e = t.phase === 'end';
+  switch (t.type) {
+    case 'dissolve':     return { opacity: e ? 1 : 0 };
+    case 'slide-left':   return { transform: e ? 'translateX(0)' : 'translateX(100%)' };
+    case 'slide-right':  return { transform: e ? 'translateX(0)' : 'translateX(-100%)' };
+    case 'slide-up':     return { transform: e ? 'translateY(0)' : 'translateY(100%)' };
+    case 'slide-down':   return { transform: e ? 'translateY(0)' : 'translateY(-100%)' };
+    default:             return { opacity: e ? 1 : 0 };
+  }
+}
+
+/* ─── HotspotPopover ────────────────────────────────────────────── */
+function HotspotPopover({ hs, otherScreens, onChange, onDelete, onClose, anchor }) {
+  const ref = useRef(null);
+  const [pos, setPos] = useState({ left: anchor.x + 14, top: anchor.y - 8 });
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const { offsetWidth: w, offsetHeight: h } = ref.current;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    setPos({
+      left: clamp(anchor.x + 14, 8, vw - w - 8),
+      top:  clamp(anchor.y - 8,  8, vh - h - 8),
+    });
+  }, [anchor.x, anchor.y]);
+
+  return (
+    <div ref={ref} className="fade-in"
+      style={{ position:'fixed', zIndex:300, left:pos.left, top:pos.top, width:248,
+               background:'#111218', border:'1px solid rgba(255,255,255,.1)',
+               borderRadius:14, boxShadow:'0 24px 60px rgba(0,0,0,.7)', padding:16 }}
+      onMouseDown={e => e.stopPropagation()} onClick={e => e.stopPropagation()}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+        <span style={{ fontSize:12, fontWeight:600, color:'#e5e7eb' }}>Hotspot</span>
+        <button onClick={onClose} style={{ color:'#6b7280', cursor:'pointer', background:'none', border:'none' }}>
+          <Icon name="X" size={14} />
+        </button>
+      </div>
+      {[
+        ['label',       'Label',       'e.g. Submit button'],
+        ['description', 'Description', 'e.g. Shows error state'],
+      ].map(([field, label, ph]) => (
+        <div key={field} style={{ marginBottom:10 }}>
+          <div style={{ fontSize:11, color:'#6b7280', marginBottom:4 }}>{label}</div>
+          <input autoFocus={field === 'label'} value={hs[field]} placeholder={ph}
+            onChange={e => onChange({ ...hs, [field]: e.target.value })}
+            style={{ width:'100%', background:'#1e1f2b', border:'1px solid rgba(255,255,255,.1)',
+                     borderRadius:8, padding:'6px 10px', fontSize:12, color:'#e5e7eb' }} />
+        </div>
+      ))}
+      <div style={{ marginBottom:14 }}>
+        <div style={{ fontSize:11, color:'#6b7280', marginBottom:4 }}>Navigate to screen</div>
+        <select value={hs.targetScreenId || ''} onChange={e => onChange({ ...hs, targetScreenId: e.target.value || null })}
+          style={{ width:'100%', background:'#1e1f2b', border:'1px solid rgba(255,255,255,.1)',
+                   borderRadius:8, padding:'6px 10px', fontSize:12, color:'#e5e7eb' }}>
+          <option value="">— none (show description) —</option>
+          {otherScreens.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </div>
+      {hs.targetScreenId && (
+        <div style={{ marginBottom:14 }}>
+          <div style={{ fontSize:11, color:'#6b7280', marginBottom:6 }}>Transition</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:4 }}>
+            {TRANSITIONS.map(t => {
+              const active = (hs.transition || 'dissolve') === t.value;
+              return (
+                <button key={t.value} onClick={() => onChange({ ...hs, transition: t.value })}
+                  style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3,
+                           padding:'6px 2px', borderRadius:8, cursor:'pointer', fontSize:10,
+                           background: active ? 'rgba(99,102,241,.25)' : 'rgba(255,255,255,.04)',
+                           border: active ? '1px solid rgba(99,102,241,.6)' : '1px solid rgba(255,255,255,.06)',
+                           color: active ? '#a5b4fc' : '#6b7280', transition:'all .15s ease' }}>
+                  <Icon name={t.icon} size={13} />
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      <div style={{ display:'flex', alignItems:'center', paddingTop:10, borderTop:'1px solid rgba(255,255,255,.07)' }}>
+        <button onClick={onDelete}
+          style={{ fontSize:11, color:'#f87171', background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:4 }}>
+          <Icon name="Trash2" size={11} style={{ color:'#f87171' }} />Delete
+        </button>
+        <div style={{ flex:1 }} />
+        <button onClick={onClose}
+          style={{ fontSize:12, background:'#4f46e5', color:'#fff', border:'none', borderRadius:8,
+                   padding:'5px 14px', cursor:'pointer', fontWeight:500 }}>Done</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Toast ─────────────────────────────────────────────────────── */
+function Toast({ message, x, y, onDone }) {
+  useEffect(() => { const t = setTimeout(onDone, 2800); return () => clearTimeout(t); }, []);
+  return (
+    <div className="toast-in"
+      style={{ position:'fixed', zIndex:400, left:x, top: y - 52,
+               transform:'translateX(-50%)',
+               background:'#111218', border:'1px solid rgba(99,102,241,.5)',
+               borderRadius:10, padding:'8px 14px', boxShadow:'0 8px 32px rgba(0,0,0,.6)',
+               display:'flex', alignItems:'center', gap:8, pointerEvents:'none' }}>
+      <span style={{ width:7, height:7, borderRadius:'50%', background:'#818cf8', flexShrink:0 }} />
+      <span style={{ fontSize:12, color:'#e5e7eb', maxWidth:240 }}>{message}</span>
+    </div>
+  );
+}
+
+/* ─── Behavior annotation types ─────────────────────────────────── */
+const BEHAVIOR_TYPES = [
+  { value: 'sticky',      label: 'Sticky',        icon: 'Pin',              color: '#f59e0b', hint: 'Sticks to top/bottom while scrolling' },
+  { value: 'scroll-area', label: 'Scroll Area',   icon: 'ScrollText',       color: '#10b981', hint: 'This region scrolls independently' },
+  { value: 'animation',   label: 'Animation',     icon: 'Sparkles',         color: '#8b5cf6', hint: 'Animates on enter or scroll trigger' },
+  { value: 'autoplay',    label: 'Auto-play',     icon: 'Repeat2',          color: '#3b82f6', hint: 'Plays or loops automatically' },
+  { value: 'expand',      label: 'Expand',        icon: 'ChevronsUpDown',   color: '#ec4899', hint: 'Expands or collapses on interact' },
+  { value: 'overlay',     label: 'Overlay',       icon: 'Layers',           color: '#06b6d4', hint: 'Floats above other content (modal, tooltip…)' },
+  { value: 'custom',      label: 'Note',          icon: 'MessageSquare',    color: '#94a3b8', hint: 'Free-form design or behavior note' },
+];
+
+/* ─── AnnotationPopover ──────────────────────────────────────────── */
+function AnnotationPopover({ ann, onChange, onDelete, onClose, anchor }) {
+  const ref = useRef(null);
+  const [pos, setPos] = useState({ left: anchor.x + 14, top: anchor.y - 8 });
+  useEffect(() => {
+    if (!ref.current) return;
+    const { offsetWidth: w, offsetHeight: h } = ref.current;
+    setPos({ left: clamp(anchor.x + 14, 8, window.innerWidth - w - 8),
+             top:  clamp(anchor.y - 8,   8, window.innerHeight - h - 8) });
+  }, [anchor.x, anchor.y]);
+
+  const bt = BEHAVIOR_TYPES.find(b => b.value === ann.type) || BEHAVIOR_TYPES[6];
+  return (
+    <div ref={ref} className="fade-in"
+      style={{ position:'fixed', zIndex:300, left:pos.left, top:pos.top, width:264,
+               background:'#111218', border:'1px solid rgba(255,255,255,.1)',
+               borderRadius:14, boxShadow:'0 24px 60px rgba(0,0,0,.7)', padding:16 }}
+      onMouseDown={e => e.stopPropagation()} onClick={e => e.stopPropagation()}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+          <div style={{ width:22, height:22, borderRadius:'50%', background: bt.color + '28',
+            border:`1.5px solid ${bt.color}`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <Icon name={bt.icon} size={11} style={{ color: bt.color }} />
+          </div>
+          <span style={{ fontSize:12, fontWeight:600, color:'#e5e7eb' }}>Behavior Annotation</span>
+        </div>
+        <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280' }}>
+          <Icon name="X" size={14} />
+        </button>
+      </div>
+
+      {/* Type grid */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:5, marginBottom:12 }}>
+        {BEHAVIOR_TYPES.map(b => (
+          <button key={b.value} onClick={() => onChange({ ...ann, type: b.value })}
+            title={b.hint}
+            style={{ background: ann.type === b.value ? b.color + '28' : 'rgba(255,255,255,.03)',
+              border:`1.5px solid ${ann.type === b.value ? b.color : 'rgba(255,255,255,.08)'}`,
+              borderRadius:8, padding:'7px 4px', cursor:'pointer',
+              display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
+            <Icon name={b.icon} size={13} style={{ color: ann.type === b.value ? b.color : '#4b5563' }} />
+            <span style={{ fontSize:9, fontWeight:600, lineHeight:1,
+              color: ann.type === b.value ? b.color : '#4b5563', whiteSpace:'nowrap' }}>{b.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Hint */}
+      <div style={{ fontSize:11, color:'#4b5563', marginBottom:10, fontStyle:'italic' }}>{bt.hint}</div>
+
+      {/* Description */}
+      <div style={{ marginBottom:14 }}>
+        <div style={{ fontSize:11, color:'#6b7280', marginBottom:4 }}>Notes</div>
+        <textarea autoFocus value={ann.description}
+          onChange={e => onChange({ ...ann, description: e.target.value })}
+          placeholder="e.g. Sticks 48px from top, z-index 100, blurs background…"
+          rows={3}
+          style={{ width:'100%', background:'#1e1f2b', border:'1px solid rgba(255,255,255,.1)',
+                   borderRadius:8, padding:'7px 10px', fontSize:12, color:'#e5e7eb',
+                   resize:'vertical', minHeight:64, outline:'none' }} />
+      </div>
+
+      <div style={{ display:'flex', alignItems:'center', paddingTop:10, borderTop:'1px solid rgba(255,255,255,.07)' }}>
+        <button onClick={onDelete}
+          style={{ fontSize:11, color:'#f87171', background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:4 }}>
+          <Icon name="Trash2" size={11} style={{ color:'#f87171' }} />Delete
+        </button>
+        <div style={{ flex:1 }} />
+        <button onClick={onClose}
+          style={{ fontSize:12, background:'#4f46e5', color:'#fff', border:'none', borderRadius:8,
+                   padding:'5px 14px', cursor:'pointer', fontWeight:500 }}>Done</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Canvas ─────────────────────────────────────────────────────── */
+const VIEWPORT_MAX_H = 1024; // design-pixel cap before scrolling kicks in
+
+function Canvas({ screen, mode, activeTool, allScreens, onUpdateScreen, onNavigate }) {
+  const wrapRef  = useRef(null);
+  const clipRef  = useRef(null);
+  const innerRef = useRef(null);
+  const { w: cw, h: ch } = useSize(wrapRef);
+
+  // hotspot selection
+  const [selectedId,    setSelectedId]    = useState(null);
+  const [popoverAnchor, setPopoverAnchor] = useState(null);
+  // annotation selection
+  const [selAnnId,      setSelAnnId]      = useState(null);
+  const [annAnchor,     setAnnAnchor]     = useState(null);
+
+  const [toast, setToast] = useState(null);
+
+  // preview behavior state
+  const [scrollTop,     setScrollTop]     = useState(0);
+  const [triggeredAnims, setTriggeredAnims] = useState(new Set());
+  const [expandedSet,   setExpandedSet]   = useState(new Set());
+  const [overlaySet,    setOverlaySet]    = useState(new Set());
+
+  const screenRef = useRef(screen);
+  useEffect(() => { screenRef.current = screen; }, [screen]);
+  useEffect(() => {
+    setSelectedId(null); setPopoverAnchor(null); setSelAnnId(null); setAnnAnchor(null);
+    setScrollTop(0); setTriggeredAnims(new Set()); setExpandedSet(new Set()); setOverlaySet(new Set());
+    if (clipRef.current) clipRef.current.scrollTop = 0;
+  }, [screen?.id, mode]);
+
+  // Trigger animations already in viewport when entering preview
+  useEffect(() => {
+    if (mode !== 'preview' || !cw || !ch) return;
+    const fw_ = screen?.imgWidth || 1440, fh_ = screen?.imgHeight || 900;
+    const vpH = Math.min(fh_, VIEWPORT_MAX_H);
+    const sc  = Math.min((cw - pad*2) / fw_, (ch - pad*2) / vpH, 1);
+    const rh_ = fh_ * sc, rvh_ = vpH * sc;
+    const toTrigger = (screen?.annotations || [])
+      .filter(a => (a.type === 'animation' || a.type === 'autoplay') && (a.y / 100) * rh_ < rvh_)
+      .map(a => a.id);
+    if (toTrigger.length) setTriggeredAnims(new Set(toTrigger));
+  }, [mode, screen?.id, cw, ch]);
+
+  if (!screen) return null;
+
+  const fw        = screen.imgWidth  || 1440;
+  const fh        = screen.imgHeight || 900;
+  const viewportH = Math.min(fh, VIEWPORT_MAX_H); // visible design-pixel height
+  const needsScroll = fh > VIEWPORT_MAX_H;
+
+  // Scale so the visible window (fw × viewportH) fits the canvas area
+  const pad   = 40;
+  const scale = (!cw || !ch) ? 0 : Math.min((cw - pad * 2) / fw, (ch - pad * 2) / viewportH, 1);
+  const rw    = fw * scale;        // rendered width  (px)
+  const rh    = fh * scale;        // rendered full height (px)
+  const rvh   = viewportH * scale; // rendered viewport height (px, the clip window)
+
+  /* Click position → % of full image dimensions, accounting for scroll */
+  const toPercent = (clientX, clientY) => {
+    const rect = clipRef.current?.getBoundingClientRect();
+    if (!rect || !rw || !rh) return { x: 0, y: 0 };
+    const scrollTop = clipRef.current.scrollTop;
+    return {
+      x: clamp(((clientX - rect.left)              / rw) * 100, 0, 96),
+      y: clamp(((clientY - rect.top  + scrollTop)  / rh) * 100, 0, 94),
+    };
+  };
+
+  /* Click on empty canvas → place hotspot or annotation depending on active tool */
+  const handleInnerMouseDown = (e) => {
+    if (mode !== 'edit') return;
+    if (e.target !== innerRef.current && e.target.tagName !== 'IMG' &&
+        !e.target.classList.contains('canvas-capture')) return;
+    const pct = toPercent(e.clientX, e.clientY);
+    if (activeTool === 'annotation') {
+      const newAnn = { id: uid(), x: pct.x, y: pct.y, w: 20, h: 8, type: 'sticky', description: '' };
+      onUpdateScreen(s => ({ ...s, annotations: [...(s.annotations || []), newAnn] }));
+      setSelAnnId(newAnn.id);
+      setAnnAnchor({ x: e.clientX, y: e.clientY, id: newAnn.id });
+    } else {
+      const newHs = { id: uid(), x: pct.x, y: pct.y, w: 12, h: 8, label: '', description: '', targetScreenId: null };
+      onUpdateScreen(s => ({ ...s, hotspots: [...s.hotspots, newHs] }));
+      setSelectedId(newHs.id);
+      setPopoverAnchor({ x: e.clientX, y: e.clientY, id: newHs.id });
+    }
+    e.stopPropagation();
+  };
+
+  /* Hotspot drag: move or resize */
+  const startDrag = (e, hsId, type) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startHs = { ...screenRef.current.hotspots.find(h => h.id === hsId) };
+    const sx = e.clientX, sy = e.clientY;
+    const crw = rw, crh = rh;
+    const onMove = (ev) => {
+      const dx = ((ev.clientX - sx) / crw) * 100;
+      const dy = ((ev.clientY - sy) / crh) * 100;
+      onUpdateScreen(s => ({
+        ...s,
+        hotspots: s.hotspots.map(h => h.id !== hsId ? h
+          : type === 'move'
+            ? { ...h, x: clamp(startHs.x + dx, 0, 100 - h.w), y: clamp(startHs.y + dy, 0, 100 - h.h) }
+            : { ...h, w: Math.max(4, startHs.w + dx), h: Math.max(3, startHs.h + dy) }
+        )
+      }));
+    };
+    const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  };
+
+  /* Annotation drag: move only (pins have no size) */
+  const startAnnDrag = (e, annId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startAnn = { ...screenRef.current.annotations?.find(a => a.id === annId) };
+    const sx = e.clientX, sy = e.clientY;
+    const crw = rw, crh = rh;
+    const onMove = (ev) => {
+      const dx = ((ev.clientX - sx) / crw) * 100;
+      const dy = ((ev.clientY - sy) / crh) * 100;
+      onUpdateScreen(s => ({
+        ...s,
+        annotations: (s.annotations || []).map(a => a.id !== annId ? a : {
+          ...a, x: clamp(startAnn.x + dx, 0, 100 - (a.w || 20)), y: clamp(startAnn.y + dy, 0, 100 - (a.h || 8)),
+        })
+      }));
+    };
+    const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  };
+
+  /* Annotation resize */
+  const startAnnResize = (e, annId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startAnn = { ...screenRef.current.annotations?.find(a => a.id === annId) };
+    const sx = e.clientX, sy = e.clientY;
+    const crw = rw, crh = rh;
+    const onMove = (ev) => {
+      const dx = ((ev.clientX - sx) / crw) * 100;
+      const dy = ((ev.clientY - sy) / crh) * 100;
+      onUpdateScreen(s => ({
+        ...s,
+        annotations: (s.annotations || []).map(a => a.id !== annId ? a : {
+          ...a, w: Math.max(6, (startAnn.w || 20) + dx), h: Math.max(3, (startAnn.h || 8) + dy),
+        })
+      }));
+    };
+    const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  };
+
+  /* Scroll handler — updates scrollTop state and triggers animations entering viewport */
+  const handleScroll = (e) => {
+    const st = e.target.scrollTop;
+    setScrollTop(st);
+    setTriggeredAnims(prev => {
+      let changed = false;
+      const next = new Set(prev);
+      (screenRef.current?.annotations || []).forEach(ann => {
+        if ((ann.type === 'animation' || ann.type === 'autoplay') && !next.has(ann.id)) {
+          if ((ann.y / 100) * rh - st < rvh) { next.add(ann.id); changed = true; }
+        }
+      });
+      return changed ? next : prev;
+    });
+  };
+
+  const handleHotspotClick = (e, hs) => {
+    e.stopPropagation();
+    if (mode === 'edit') {
+      setSelectedId(hs.id);
+      setPopoverAnchor({ x: e.clientX, y: e.clientY, id: hs.id });
+    } else {
+      if (hs.targetScreenId) onNavigate(hs.targetScreenId, hs.transition || 'dissolve');
+      else if (hs.description) setToast({ message: hs.description, x: e.clientX, y: e.clientY });
+    }
+  };
+
+  /* Hotspot helpers */
+  const updateHs  = (hs) => onUpdateScreen(s => ({ ...s, hotspots: s.hotspots.map(h => h.id === hs.id ? hs : h) }));
+  const deleteHs  = (id) => { onUpdateScreen(s => ({ ...s, hotspots: s.hotspots.filter(h => h.id !== id) })); setSelectedId(null); setPopoverAnchor(null); };
+  const popoverHs = screen.hotspots.find(h => h.id === popoverAnchor?.id);
+
+  /* Annotation helpers */
+  const updateAnn = (ann) => onUpdateScreen(s => ({ ...s, annotations: (s.annotations || []).map(a => a.id === ann.id ? ann : a) }));
+  const deleteAnn = (id)  => { onUpdateScreen(s => ({ ...s, annotations: (s.annotations || []).filter(a => a.id !== id) })); setSelAnnId(null); setAnnAnchor(null); };
+  const activeAnn = (screen.annotations || []).find(a => a.id === annAnchor?.id);
+
+  return (
+    <div ref={wrapRef} style={{ flex:1, position:'relative', display:'flex', alignItems:'center',
+      justifyContent:'center', overflow:'hidden', minWidth:0, minHeight:0,
+      background:'#12131a',
+      backgroundImage:'radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px)',
+      backgroundSize:'22px 22px' }}>
+
+      {screen.type === 'figma' && (
+        <div style={{ position:'absolute', top:10, left:'50%', transform:'translateX(-50%)', zIndex:10,
+          background:'rgba(120,90,0,.25)', border:'1px solid rgba(234,179,8,.3)', borderRadius:8,
+          padding:'5px 12px', display:'flex', alignItems:'center', gap:6, pointerEvents:'none' }}>
+          <Icon name="AlertTriangle" size={11} style={{ color:'#fbbf24' }} />
+          <span style={{ fontSize:11, color:'#fcd34d' }}>Embed mode — export from Figma as PNG for full fidelity</span>
+        </div>
+      )}
+
+      {/* ── Scrollable viewport clip ── */}
+      {scale > 0 && (
+        <div ref={clipRef}
+          onScroll={handleScroll}
+          style={{ width:rw, height:rvh, flexShrink:0, position:'relative',
+            overflowY: needsScroll ? 'auto' : 'hidden', overflowX:'hidden',
+            borderRadius:2,
+            boxShadow:'0 28px 72px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.07)',
+            userSelect:'none' }}>
+
+          {/* ── Full-height inner content ── */}
+          <div ref={innerRef}
+            style={{ width:rw, height:rh, position:'relative', flexShrink:0,
+              cursor: mode === 'edit' ? 'crosshair' : 'default' }}
+            onMouseDown={handleInnerMouseDown}>
+
+            {screen.type === 'figma' ? (
+              <>
+                <iframe
+                  src={`https://www.figma.com/embed?embed_host=share&url=${encodeURIComponent(screen.src)}&hide-ui=1&scaling=contain&hotspot-hints=0`}
+                  style={{ position:'absolute', inset:0, width:'100%', height:'100%', border:'none', display:'block', pointerEvents:'none' }}
+                  allowFullScreen />
+                <div className="canvas-capture" style={{ position:'absolute', inset:0, zIndex:2 }} />
+              </>
+            ) : screen.src ? (
+              <img src={screen.src} draggable={false}
+                onLoad={e => {
+                  const { naturalWidth: w, naturalHeight: h } = e.target;
+                  if (w && h && (w !== screen.imgWidth || h !== screen.imgHeight))
+                    onUpdateScreen(s => ({ ...s, imgWidth: w, imgHeight: h }));
+                }}
+                style={{ position:'absolute', inset:0, width:'100%', height:'100%',
+                         objectFit:'fill', display:'block', pointerEvents:'none' }} />
+            ) : (
+              <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column',
+                alignItems:'center', justifyContent:'center', gap:10, background:'#1c1d27' }}>
+                <Icon name="ImageOff" size={28} style={{ color:'#374151' }} />
+                <span style={{ fontSize:12, color:'#4b5563' }}>No image</span>
+              </div>
+            )}
+
+            {/* Hotspot overlays */}
+            {screen.hotspots.map(hs => {
+              const sel = hs.id === selectedId && mode === 'edit';
+              const prev = mode === 'preview';
+              const hasTarget = !!hs.targetScreenId;
+              return (
+                <div key={hs.id} style={{
+                  position:'absolute', left:`${hs.x}%`, top:`${hs.y}%`,
+                  width:`${hs.w}%`, height:`${hs.h}%`,
+                  background: prev ? 'transparent' : sel ? 'rgba(99,102,241,.38)' : 'rgba(99,102,241,.18)',
+                  border: prev ? 'none' : `${sel ? 2 : 1.5}px solid ${sel ? 'rgba(165,180,252,.95)' : 'rgba(99,102,241,.55)'}`,
+                  borderRadius:3, cursor: prev ? (hasTarget ? 'pointer' : 'default') : 'move',
+                  zIndex: sel ? 12 : 6, transition: prev ? 'none' : 'background .12s',
+                }}
+                  onMouseDown={e => { if (mode === 'edit') { e.stopPropagation(); startDrag(e, hs.id, 'move'); }}}
+                  onClick={e => handleHotspotClick(e, hs)}>
+                  {!prev && (
+                    <>
+                      <span style={{ fontSize:10, color:'rgba(199,210,254,.9)', padding:'2px 5px',
+                        display:'block', overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis',
+                        lineHeight:'16px', fontWeight:600, fontFamily:'monospace' }}>
+                        {hs.label || 'Hotspot'}
+                      </span>
+                      {hs.targetScreenId && (
+                        <span style={{ position:'absolute', bottom:2, right:4, fontSize:9,
+                          color:'rgba(165,180,252,.65)', fontFamily:'monospace' }}>
+                          → {allScreens.find(s => s.id === hs.targetScreenId)?.name || '?'}
+                        </span>
+                      )}
+                      <div style={{ position:'absolute', right:-5, bottom:-5, width:11, height:11,
+                        background: sel ? 'rgba(165,180,252,1)' : 'rgba(99,102,241,.75)',
+                        borderRadius:2, cursor:'se-resize', zIndex:20, border:'1.5px solid rgba(255,255,255,.3)' }}
+                        onMouseDown={e => { e.stopPropagation(); startDrag(e, hs.id, 'resize'); }} />
+                    </>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Annotation regions — rectangles in edit mode, behaviors in preview */}
+            {mode !== 'preview' && (screen.annotations || []).map(ann => {
+              const bt  = BEHAVIOR_TYPES.find(b => b.value === ann.type) || BEHAVIOR_TYPES[6];
+              const sel = ann.id === selAnnId;
+              const aw  = ann.w || 20;
+              const ah  = ann.h || 8;
+              return (
+                <div key={ann.id} style={{
+                  position:'absolute', left:`${ann.x}%`, top:`${ann.y}%`,
+                  width:`${aw}%`, height:`${ah}%`,
+                  background: bt.color + (sel ? '28' : '14'),
+                  border:`${sel ? 2 : 1.5}px solid ${bt.color}${sel ? 'cc' : '77'}`,
+                  borderRadius:3, cursor:'move', zIndex: sel ? 20 : 14, userSelect:'none',
+                }}
+                  onMouseDown={e => { e.stopPropagation(); startAnnDrag(e, ann.id); }}
+                  onClick={e => { e.stopPropagation(); setSelAnnId(ann.id); setAnnAnchor({ x: e.clientX, y: e.clientY, id: ann.id }); }}>
+                  {/* Type badge */}
+                  <div style={{ display:'flex', alignItems:'center', gap:3, padding:'2px 5px',
+                    background: bt.color + '33', borderBottom:`1px solid ${bt.color}44`,
+                    borderRadius:'2px 2px 0 0', overflow:'hidden' }}>
+                    <Icon name={bt.icon} size={9} style={{ color: bt.color }} />
+                    <span style={{ fontSize:9, color: bt.color, fontWeight:700, letterSpacing:'.03em',
+                      whiteSpace:'nowrap' }}>{bt.label}</span>
+                  </div>
+                  {/* Description tooltip when selected */}
+                  {sel && ann.description && (
+                    <div style={{ position:'absolute', top:'calc(100% + 4px)', left:0, zIndex:30,
+                      background:'#1a1b25', border:`1px solid ${bt.color}66`,
+                      borderRadius:6, padding:'4px 8px', fontSize:10, color:'#d1d5db',
+                      whiteSpace:'nowrap', maxWidth:220, overflow:'hidden', textOverflow:'ellipsis',
+                      pointerEvents:'none', boxShadow:'0 4px 12px rgba(0,0,0,.5)' }}>
+                      {ann.description}
+                    </div>
+                  )}
+                  {/* Resize handle */}
+                  <div style={{ position:'absolute', right:-5, bottom:-5, width:11, height:11,
+                    background: sel ? bt.color : bt.color + '99',
+                    borderRadius:2, cursor:'se-resize', zIndex:22,
+                    border:'1.5px solid rgba(255,255,255,.3)' }}
+                    onMouseDown={e => { e.stopPropagation(); startAnnResize(e, ann.id); }} />
+                </div>
+              );
+            })}
+
+            {/* Preview behavior overlays */}
+            {mode === 'preview' && screen.src && (screen.annotations || []).map(ann => {
+              const aw = ann.w || 20, ah = ann.h || 8;
+              const nl = ann.x / 100 * rw;
+              const nt = ann.y / 100 * rh;
+              const nw = aw / 100 * rw;
+              const nh = ah / 100 * rh;
+              const bg = { backgroundImage:`url(${screen.src})`, backgroundSize:`${rw}px ${rh}px`,
+                           backgroundPosition:`-${nl}px -${nt}px`, backgroundRepeat:'no-repeat' };
+
+              if (ann.type === 'sticky') {
+                const stickyTop = Math.max(nt, scrollTop);
+                return (
+                  <div key={ann.id} style={{ position:'absolute', left:nl, top:stickyTop,
+                    width:nw, height:nh, ...bg, zIndex:50,
+                    boxShadow: stickyTop > nt ? '0 4px 20px rgba(0,0,0,.55)' : 'none',
+                    transition:'box-shadow .1s' }} />
+                );
+              }
+
+              if (ann.type === 'animation') {
+                const triggered = triggeredAnims.has(ann.id);
+                return (
+                  <div key={ann.id} style={{ position:'absolute', left:nl, top:nt,
+                    width:nw, height:nh, ...bg, zIndex:40, pointerEvents:'none',
+                    opacity: triggered ? 1 : 0,
+                    transform: triggered ? 'translateY(0)' : 'translateY(18px)',
+                    transition:'opacity .55s ease, transform .55s ease' }} />
+                );
+              }
+
+              if (ann.type === 'autoplay') {
+                const triggered = triggeredAnims.has(ann.id);
+                return (
+                  <div key={ann.id} style={{ position:'absolute', left:nl, top:nt,
+                    width:nw, height:nh, zIndex:40, pointerEvents:'none',
+                    opacity: triggered ? 1 : 0, transition:'opacity .6s ease' }}>
+                    <div style={{ width:'100%', height:'100%', ...bg }} />
+                    {triggered && (
+                      <div style={{ position:'absolute', inset:0, borderRadius:2,
+                        border:'2px solid rgba(59,130,246,.7)',
+                        animation:'autoplay-pulse 2s ease-in-out infinite' }} />
+                    )}
+                  </div>
+                );
+              }
+
+              if (ann.type === 'expand') {
+                const expanded = expandedSet.has(ann.id);
+                const dispH = expanded ? nh : Math.max(nh * 0.32, 22);
+                return (
+                  <div key={ann.id}
+                    onClick={() => setExpandedSet(prev => { const n = new Set(prev); n.has(ann.id) ? n.delete(ann.id) : n.add(ann.id); return n; })}
+                    style={{ position:'absolute', left:nl, top:nt, width:nw, height:dispH,
+                      overflow:'hidden', cursor:'pointer', zIndex:45,
+                      transition:'height .3s ease',
+                      boxShadow:'0 4px 16px rgba(0,0,0,.35)' }}>
+                    <div style={{ ...bg, width:nw, height:nh }} />
+                    {!expanded && (
+                      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:22,
+                        background:'linear-gradient(transparent,rgba(0,0,0,.65))',
+                        display:'flex', alignItems:'flex-end', justifyContent:'center', paddingBottom:3 }}>
+                        <span style={{ fontSize:9, color:'#fff', fontWeight:700 }}>▼ tap to expand</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              if (ann.type === 'overlay') {
+                return (
+                  <div key={ann.id}
+                    onClick={e => { e.stopPropagation(); setOverlaySet(prev => { const n = new Set(prev); n.add(ann.id); return n; }); }}
+                    style={{ position:'absolute', left:nl, top:nt, width:nw, height:nh,
+                      cursor:'pointer', zIndex:45,
+                      border:'2px solid rgba(6,182,212,.5)', borderRadius:2,
+                      background:'rgba(6,182,212,.07)',
+                      display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <div style={{ background:'rgba(6,182,212,.85)', borderRadius:4,
+                      padding:'2px 8px', display:'flex', alignItems:'center', gap:4 }}>
+                      <Icon name="Layers" size={9} style={{ color:'#fff' }} />
+                      <span style={{ fontSize:9, color:'#fff', fontWeight:700 }}>tap to reveal</span>
+                    </div>
+                  </div>
+                );
+              }
+
+              if (ann.type === 'scroll-area') {
+                return (
+                  <div key={ann.id} style={{ position:'absolute', left:nl, top:nt, width:nw, height:nh,
+                    border:'2px solid rgba(16,185,129,.45)', borderRadius:2, zIndex:40,
+                    pointerEvents:'none', overflow:'hidden' }}>
+                    <div style={{ position:'absolute', right:3, top:'50%', transform:'translateY(-50%)',
+                      display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
+                      <div style={{ width:3, height:3, borderRadius:'50%', background:'rgba(16,185,129,.7)' }} />
+                      <div style={{ width:3, height:14, borderRadius:1.5, background:'rgba(16,185,129,.25)',
+                        position:'relative', overflow:'hidden' }}>
+                        <div style={{ position:'absolute', top:0, width:'100%', height:6,
+                          borderRadius:1.5, background:'rgba(16,185,129,.8)' }} />
+                      </div>
+                      <div style={{ width:3, height:3, borderRadius:'50%', background:'rgba(16,185,129,.7)' }} />
+                    </div>
+                  </div>
+                );
+              }
+
+              return null;
+            })}
+
+          </div>
+        </div>
+      )}
+
+      {/* Readouts */}
+      <div style={{ position:'absolute', bottom:10, right:14, display:'flex', alignItems:'center',
+        gap:10, fontSize:10, color:'rgba(255,255,255,.2)', fontFamily:'monospace', userSelect:'none', pointerEvents:'none' }}>
+        {needsScroll && (
+          <span style={{ display:'flex', alignItems:'center', gap:4 }}>
+            <Icon name="ChevronsUpDown" size={10} style={{ color:'rgba(255,255,255,.2)' }} />
+            {fh}px · scroll to see all
+          </span>
+        )}
+        {scale > 0 && scale < .995 && <span>{Math.round(scale * 100)}%</span>}
+      </div>
+
+      {popoverHs && mode === 'edit' && popoverAnchor && (
+        <HotspotPopover
+          hs={popoverHs}
+          otherScreens={allScreens.filter(s => s.id !== screen.id)}
+          onChange={updateHs}
+          onDelete={() => deleteHs(popoverHs.id)}
+          onClose={() => { setSelectedId(null); setPopoverAnchor(null); }}
+          anchor={popoverAnchor}
+        />
+      )}
+
+      {activeAnn && mode === 'edit' && annAnchor && (
+        <AnnotationPopover
+          ann={activeAnn}
+          onChange={updateAnn}
+          onDelete={() => deleteAnn(activeAnn.id)}
+          onClose={() => { setSelAnnId(null); setAnnAnchor(null); }}
+          anchor={annAnchor}
+        />
+      )}
+
+      {toast && <Toast message={toast.message} x={toast.x} y={toast.y} onDone={() => setToast(null)} />}
+
+      {/* Overlay modals — fixed position, rendered over entire canvas */}
+      {mode === 'preview' && screen.src && (screen.annotations || [])
+        .filter(ann => ann.type === 'overlay' && overlaySet.has(ann.id))
+        .map(ann => {
+          const aw = ann.w || 20, ah = ann.h || 8;
+          const nl = ann.x / 100 * rw, nt = ann.y / 100 * rh;
+          const nw = aw / 100 * rw,    nh = ah / 100 * rh;
+          return (
+            <div key={ann.id}
+              onClick={() => setOverlaySet(prev => { const n = new Set(prev); n.delete(ann.id); return n; })}
+              style={{ position:'fixed', inset:0, zIndex:200, background:'rgba(0,0,0,.72)',
+                backdropFilter:'blur(2px)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <div onClick={e => e.stopPropagation()}
+                style={{ position:'relative', width:nw, height:nh, borderRadius:10,
+                  overflow:'hidden', boxShadow:'0 24px 72px rgba(0,0,0,.9)',
+                  backgroundImage:`url(${screen.src})`,
+                  backgroundSize:`${rw}px ${rh}px`,
+                  backgroundPosition:`-${nl}px -${nt}px`,
+                  backgroundRepeat:'no-repeat' }}>
+                <button onClick={() => setOverlaySet(prev => { const n = new Set(prev); n.delete(ann.id); return n; })}
+                  style={{ position:'absolute', top:6, right:6, width:22, height:22, borderRadius:'50%',
+                    background:'rgba(0,0,0,.55)', border:'none', cursor:'pointer',
+                    display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <Icon name="X" size={11} style={{ color:'#fff' }} />
+                </button>
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  );
+}
+
+/* ─── AddScreenDialog ────────────────────────────────────────────── */
+function AddScreenDialog({ onAdd, onClose }) {
+  const [name, setName]   = useState('');
+  const [url,  setUrl]    = useState('');
+  const [drag, setDrag]   = useState(false);
+  const fileRef           = useRef(null);
+
+  const submit = (src, w, h, isFigma, fallbackName) => {
+    const screenName = name.trim() || fallbackName || (isFigma ? 'Figma Screen' : 'Screen');
+    onAdd({ id: uid(), name: screenName,
+            type: isFigma ? 'figma' : 'image', src, imgWidth: w, imgHeight: h, hotspots: [], annotations: [] });
+  };
+
+  const loadFile = (file) => {
+    if (!file?.type.startsWith('image/')) return;
+    const fallback = file.name.replace(/\.[^.]+$/, '');
+    if (!name.trim()) setName(fallback);
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => submit(ev.target.result, img.naturalWidth, img.naturalHeight, false, fallback);
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const loadFiles = (fileList) => {
+    const files = [...fileList].filter(f => f.type.startsWith('image/'));
+    if (!files.length) return;
+    if (files.length === 1) { loadFile(files[0]); return; }
+    // Multiple files — use filenames as screen names and close dialog immediately
+    onClose();
+    files.forEach(file => {
+      const screenName = file.name.replace(/\.[^.]+$/, '');
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => onAdd({
+          id: uid(), name: screenName, type: 'image',
+          src: ev.target.result, imgWidth: img.naturalWidth, imgHeight: img.naturalHeight,
+          hotspots: [], annotations: [],
+        });
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const loadUrl = () => {
+    const v = url.trim();
+    if (!v) return;
+    if (v.includes('figma.com')) { submit(v, 1440, 900, true); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    const done = () => submit(v, img.naturalWidth || 1440, img.naturalHeight || 900, false);
+    img.onload = done;
+    img.onerror = done;
+    img.src = v;
+  };
+
+  const isFigmaUrl = url.includes('figma.com');
+
+  return (
+    <div onClick={onClose} style={{ position:'fixed', inset:0, zIndex:500, background:'rgba(0,0,0,.65)',
+      backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <div className="fade-in" onClick={e => e.stopPropagation()}
+        style={{ background:'#111218', border:'1px solid rgba(255,255,255,.1)', borderRadius:18,
+                 boxShadow:'0 32px 80px rgba(0,0,0,.8)', padding:24, width:384 }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
+          <span style={{ fontSize:14, fontWeight:600, color:'#f3f4f6' }}>Add Screen</span>
+          <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280' }}>
+            <Icon name="X" size={16} />
+          </button>
+        </div>
+
+        <div style={{ marginBottom:14 }}>
+          <div style={{ fontSize:11, color:'#6b7280', marginBottom:5 }}>Screen Name</div>
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Home, Sign-up, Dashboard"
+            style={{ width:'100%', background:'#1e1f2b', border:'1px solid rgba(255,255,255,.1)',
+                     borderRadius:8, padding:'8px 12px', fontSize:13, color:'#f3f4f6' }} />
+        </div>
+
+        {/* Drop zone */}
+        <div onDragOver={e => { e.preventDefault(); setDrag(true); }}
+          onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDrag(false); }}
+          onDrop={e => { e.preventDefault(); setDrag(false); loadFiles(e.dataTransfer.files); }}
+          onClick={() => fileRef.current?.click()}
+          style={{ border:`2px dashed ${drag ? 'rgba(99,102,241,.9)' : 'rgba(255,255,255,.1)'}`,
+            borderRadius:12, padding:'28px 20px', textAlign:'center', cursor:'pointer',
+            background: drag ? 'rgba(99,102,241,.08)' : 'rgba(255,255,255,.02)',
+            transition:'all .15s', marginBottom:14 }}>
+          <Icon name="ImageUp" size={22} style={{ color:'#4b5563', margin:'0 auto 8px' }} />
+          <div style={{ fontSize:13, color:'#9ca3af', marginBottom:4 }}>Drop images or click to upload</div>
+          <div style={{ fontSize:11, color:'#4b5563' }}>PNG or JPG · drop multiple screens at once</div>
+          <input ref={fileRef} type="file" accept="image/*" multiple style={{ display:'none' }}
+            onChange={e => loadFiles(e.target.files)} />
+        </div>
+
+        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14 }}>
+          <div style={{ flex:1, height:1, background:'rgba(255,255,255,.07)' }} />
+          <span style={{ fontSize:11, color:'#4b5563' }}>or paste URL</span>
+          <div style={{ flex:1, height:1, background:'rgba(255,255,255,.07)' }} />
+        </div>
+
+        <div style={{ display:'flex', gap:8 }}>
+          <input value={url} onChange={e => setUrl(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && loadUrl()}
+            placeholder="Image URL or Figma link…"
+            style={{ flex:1, background:'#1e1f2b', border:'1px solid rgba(255,255,255,.1)',
+                     borderRadius:8, padding:'8px 12px', fontSize:13, color:'#f3f4f6' }} />
+          <button onClick={loadUrl} disabled={!url.trim() || (!name.trim() && !isFigmaUrl)}
+            style={{ background:'#4f46e5', color:'#fff', border:'none', borderRadius:8,
+                     padding:'8px 18px', fontSize:13, fontWeight:500, cursor:'pointer', opacity: (!url.trim() || (!name.trim() && !isFigmaUrl)) ? .35 : 1 }}>
+            Add
+          </button>
+        </div>
+
+        {isFigmaUrl && (
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:10, fontSize:11, color:'#fcd34d' }}>
+            <Icon name="AlertTriangle" size={11} style={{ color:'#fcd34d' }} />
+            Figma embed has limited fidelity — export frames as PNG for best results
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Sidebar ────────────────────────────────────────────────────── */
+function Sidebar({ screens, activeId, onSelect, onDelete, onAddClick }) {
+  const connections = useMemo(() => {
+    const out = [];
+    screens.forEach(s => s.hotspots.forEach(h => {
+      if (h.targetScreenId) {
+        const t = screens.find(x => x.id === h.targetScreenId);
+        if (t) out.push({ fromId: s.id, toId: t.id, from: s.name, to: t.name, label: h.label });
+      }
+    }));
+    return out;
+  }, [screens]);
+
+  return (
+    <div style={{ width:260, background:'#0b0c12', borderRight:'1px solid rgba(255,255,255,.07)',
+      display:'flex', flexDirection:'column', flexShrink:0, height:'100%' }}>
+
+      {/* Logo */}
+      <div style={{ padding:'14px 16px', borderBottom:'1px solid rgba(255,255,255,.07)',
+        display:'flex', alignItems:'center', gap:10 }}>
+        <div style={{ width:26, height:26, background:'#4f46e5', borderRadius:7,
+          display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <Icon name="Layers" size={13} style={{ color:'#fff' }} />
+        </div>
+        <span style={{ fontSize:14, fontWeight:600, color:'#f9fafb' }}>ProtoFlow</span>
+      </div>
+
+      {/* Screen list header */}
+      <div style={{ padding:'12px 14px 8px', borderBottom:'1px solid rgba(255,255,255,.05)' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8 }}>
+          <span style={{ fontSize:10, fontWeight:600, color:'#4b5563', letterSpacing:'.08em', textTransform:'uppercase' }}>
+            Screens
+          </span>
+          <button onClick={onAddClick} title="Add screen"
+            style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', padding:2 }}>
+            <Icon name="Plus" size={15} style={{ color:'#6b7280' }} />
+          </button>
+        </div>
+
+        {screens.length === 0 && (
+          <div style={{ textAlign:'center', padding:'16px 8px', color:'#374151', fontSize:12 }}>
+            No screens yet
+          </div>
+        )}
+
+        <div style={{ overflowY:'auto', maxHeight:320 }}>
+          {screens.map(s => (
+            <div key={s.id} onClick={() => onSelect(s.id)}
+              style={{ display:'flex', alignItems:'center', gap:10, borderRadius:9, padding:'7px 8px',
+                cursor:'pointer', marginBottom:2, position:'relative',
+                background: s.id === activeId ? 'rgba(79,70,229,.2)' : 'transparent',
+                border: `1px solid ${s.id === activeId ? 'rgba(99,102,241,.45)' : 'transparent'}`,
+                transition:'all .13s' }}
+              className="group">
+              {/* Thumb */}
+              <div style={{ width:42, height:28, borderRadius:5, overflow:'hidden', flexShrink:0,
+                background:'#1c1d27', border:'1px solid rgba(255,255,255,.07)' }}>
+                {s.src && s.type === 'image'
+                  ? <img src={s.src} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                  : s.type === 'figma'
+                  ? <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      <Icon name="Figma" size={13} style={{ color:'#4b5563' }} />
+                    </div>
+                  : null}
+              </div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontSize:12, fontFamily:'monospace', color: s.id === activeId ? '#e5e7eb' : '#9ca3af',
+                  whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{s.name}</div>
+                <div style={{ fontSize:10, color:'#4b5563', marginTop:1 }}>
+                  {s.imgWidth}×{s.imgHeight} · {s.hotspots.length} hs
+                </div>
+              </div>
+              <button onClick={e => { e.stopPropagation(); onDelete(s.id); }}
+                style={{ background:'none', border:'none', cursor:'pointer', color:'#374151',
+                  padding:2, opacity:0, transition:'opacity .12s' }}
+                onMouseEnter={e => e.currentTarget.style.opacity=1}
+                onMouseLeave={e => e.currentTarget.style.opacity=0}>
+                <Icon name="X" size={12} style={{ color:'#6b7280' }} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Flow connections */}
+      <div style={{ flex:1, overflowY:'auto', padding:'12px 14px' }}>
+        <div style={{ fontSize:10, fontWeight:600, color:'#4b5563', letterSpacing:'.08em',
+          textTransform:'uppercase', marginBottom:10 }}>Flow</div>
+        {connections.length === 0
+          ? <div style={{ fontSize:11, color:'#374151' }}>No connections yet</div>
+          : connections.map((c, i) => (
+            <div key={i} style={{ display:'flex', alignItems:'center', gap:5, marginBottom:7, flexWrap:'wrap' }}>
+              <span style={{ fontSize:11, fontFamily:'monospace', color:'#818cf8',
+                background:'rgba(79,70,229,.15)', borderRadius:4, padding:'1px 5px',
+                maxWidth:88, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.from}</span>
+              <Icon name="ArrowRight" size={10} style={{ color:'#374151', flexShrink:0 }} />
+              <span style={{ fontSize:11, fontFamily:'monospace', color:'#6b7280',
+                maxWidth:88, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.to}</span>
+              {c.label && (
+                <span style={{ fontSize:9, color:'#4b5563', fontStyle:'italic', width:'100%', paddingLeft:2 }}>
+                  via "{c.label}"
+                </span>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  );
+}
+
+/* ─── App ────────────────────────────────────────────────────────── */
+function App() {
+  const [screens,     setScreens]     = useState([]);
+  const [activeId,    setActiveId]    = useState(null);
+  const [mode,        setMode]        = useState('edit');
+  const [activeTool,  setActiveTool]  = useState('hotspot');
+  const [showAdd,     setShowAdd]     = useState(false);
+  const [transAnim,   setTransAnim]   = useState(null);   // { type, fromSrc, phase }
+  const screensRef = useRef(screens);
+  screensRef.current = screens;
+
+  const activeScreen = screens.find(s => s.id === activeId);
+
+  const addScreen = (s) => {
+    setScreens(p => [...p, s]);
+    setActiveId(s.id);
+    setShowAdd(false);
+  };
+
+  const deleteScreen = (id) => setScreens(p => {
+    const next = p.filter(s => s.id !== id);
+    if (activeId === id) setActiveId(next[0]?.id ?? null);
+    return next;
+  });
+
+  const updateScreen = useCallback((updater) => {
+    setScreens(p => p.map(s => {
+      if (typeof updater === 'function') return s.id === activeId ? updater(s) : s;
+      return s.id === updater.id ? updater : s;
+    }));
+  }, [activeId]);
+
+  const navigate = useCallback((targetId, transitionType = 'dissolve') => {
+    if (transitionType === 'instant') { setActiveId(targetId); return; }
+    const cur = screensRef.current.find(s => s.id === activeId);
+    const fromSrc = cur ? cur.src : null;
+    setTransAnim({ type: transitionType, fromSrc, phase: 'start' });
+    setActiveId(targetId);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setTransAnim(prev => prev ? { ...prev, phase: 'end' } : null));
+    });
+    setTimeout(() => setTransAnim(null), 420);
+  }, [activeId]);
+
+  return (
+    <div style={{ display:'flex', height:'100vh', background:'#0d0e14', overflow:'hidden' }}>
+      <Sidebar screens={screens} activeId={activeId}
+        onSelect={setActiveId} onDelete={deleteScreen} onAddClick={() => setShowAdd(true)} />
+
+      <div style={{ flex:1, display:'flex', flexDirection:'column', minWidth:0, minHeight:0 }}>
+        {/* Toolbar */}
+        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 16px',
+          background:'rgba(11,12,18,.8)', borderBottom:'1px solid rgba(255,255,255,.07)', flexShrink:0 }}>
+          {/* Mode toggle */}
+          <div style={{ display:'flex', background:'#1a1b25', borderRadius:9, padding:3, gap:2 }}>
+            {[['edit','Pencil','Edit'],['preview','Play','Preview']].map(([m, ic, lb]) => (
+              <button key={m} onClick={() => setMode(m)}
+                style={{ display:'flex', alignItems:'center', gap:5, fontSize:12, fontWeight:500,
+                  borderRadius:6, padding:'5px 12px', border:'none', cursor:'pointer', transition:'all .15s',
+                  background: mode === m ? (m === 'preview' ? '#16a34a' : '#4f46e5') : 'transparent',
+                  color: mode === m ? '#fff' : '#6b7280' }}>
+                <Icon name={ic} size={12} style={{ color: mode === m ? '#fff' : '#6b7280' }} />
+                {lb}
+              </button>
+            ))}
+          </div>
+
+          {activeScreen && (
+            <>
+              <div style={{ width:1, height:18, background:'rgba(255,255,255,.1)' }} />
+              <span style={{ fontSize:13, fontFamily:'monospace', color:'#d1d5db' }}>{activeScreen.name}</span>
+              <span style={{ fontSize:11, color:'#374151', fontFamily:'monospace' }}>
+                {activeScreen.imgWidth}×{activeScreen.imgHeight}
+              </span>
+            </>
+          )}
+
+          {/* Tool selector — only in edit mode */}
+          {mode === 'edit' && (
+            <>
+              <div style={{ width:1, height:18, background:'rgba(255,255,255,.1)' }} />
+              <div style={{ display:'flex', background:'#1a1b25', borderRadius:9, padding:3, gap:2 }}>
+                <button onClick={() => setActiveTool('hotspot')}
+                  style={{ display:'flex', alignItems:'center', gap:5, fontSize:12, fontWeight:500,
+                    borderRadius:6, padding:'5px 11px', border:'none', cursor:'pointer', transition:'all .15s',
+                    background: activeTool === 'hotspot' ? '#312e81' : 'transparent',
+                    color: activeTool === 'hotspot' ? '#a5b4fc' : '#6b7280' }}>
+                  <Icon name="MousePointerClick" size={12} style={{ color: activeTool === 'hotspot' ? '#a5b4fc' : '#6b7280' }} />
+                  Hotspot
+                </button>
+                <button onClick={() => setActiveTool('annotation')}
+                  style={{ display:'flex', alignItems:'center', gap:5, fontSize:12, fontWeight:500,
+                    borderRadius:6, padding:'5px 11px', border:'none', cursor:'pointer', transition:'all .15s',
+                    background: activeTool === 'annotation' ? '#78350f' : 'transparent',
+                    color: activeTool === 'annotation' ? '#fcd34d' : '#6b7280' }}>
+                  <Icon name="Pin" size={12} style={{ color: activeTool === 'annotation' ? '#fcd34d' : '#6b7280' }} />
+                  Annotate
+                </button>
+              </div>
+            </>
+          )}
+
+          <div style={{ flex:1 }} />
+
+          {mode === 'edit' && (
+            <span style={{ fontSize:11, color:'#374151', display:'flex', alignItems:'center', gap:5 }}>
+              <Icon name={activeTool === 'annotation' ? 'Pin' : 'MousePointerClick'} size={12} style={{ color:'#374151' }} />
+              {activeTool === 'annotation' ? 'Click to place behavior annotation · drag to move/resize' : 'Click to place hotspot · drag to move/resize'}
+            </span>
+          )}
+
+          <button onClick={() => setShowAdd(true)}
+            style={{ display:'flex', alignItems:'center', gap:6, fontSize:12, fontWeight:500,
+              background:'#1a1b25', border:'1px solid rgba(255,255,255,.1)', color:'#d1d5db',
+              borderRadius:8, padding:'6px 14px', cursor:'pointer', transition:'all .15s' }}>
+            <Icon name="Plus" size={13} style={{ color:'#9ca3af' }} />
+            Add Screen
+          </button>
+        </div>
+
+        {/* Canvas */}
+        <div style={{ flex:1, display:'flex', minHeight:0, position:'relative', overflow:'hidden' }}>
+          {activeScreen ? (
+            <div style={{ position:'absolute', inset:0, display:'flex',
+                          ...getInStyle(transAnim),
+                          transition: transAnim ? 'opacity .38s ease, transform .38s ease' : 'none' }}>
+              <Canvas
+                screen={activeScreen}
+                mode={mode}
+                activeTool={activeTool}
+                allScreens={screens}
+                onUpdateScreen={updateScreen}
+                onNavigate={navigate}
+              />
+            </div>
+          ) : (
+            <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+              justifyContent:'center', gap:20, background:'#12131a',
+              backgroundImage:'radial-gradient(circle,rgba(255,255,255,.03) 1px,transparent 1px)',
+              backgroundSize:'22px 22px' }}>
+              <div style={{ width:72, height:72, background:'#1a1b25', border:'1px solid rgba(255,255,255,.08)',
+                borderRadius:20, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <Icon name="Layers" size={28} style={{ color:'#374151' }} />
+              </div>
+              <div style={{ textAlign:'center' }}>
+                <div style={{ fontSize:18, fontWeight:600, color:'#f9fafb', marginBottom:8 }}>ProtoFlow</div>
+                <div style={{ fontSize:13, color:'#6b7280', maxWidth:300 }}>
+                  Upload Figma screen exports and wire them together with clickable hotspots.
+                </div>
+              </div>
+              <button onClick={() => setShowAdd(true)}
+                style={{ display:'flex', alignItems:'center', gap:8, background:'#4f46e5',
+                  color:'#fff', border:'none', borderRadius:10, padding:'10px 22px',
+                  fontSize:13, fontWeight:500, cursor:'pointer' }}>
+                <Icon name="Plus" size={15} style={{ color:'#fff' }} />
+                Add First Screen
+              </button>
+              <div style={{ display:'flex', gap:24, marginTop:8 }}>
+                {[['ImageUp','Upload screens','Export PNG from Figma'],
+                  ['MousePointerClick','Place hotspots','Click anywhere on image'],
+                  ['Play','Preview flow','Click through your prototype']].map(([ic,t,d]) => (
+                  <div key={t} style={{ textAlign:'center', maxWidth:110 }}>
+                    <div style={{ width:38, height:38, background:'#1a1b25', border:'1px solid rgba(255,255,255,.07)',
+                      borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 8px' }}>
+                      <Icon name={ic} size={15} style={{ color:'#6366f1' }} />
+                    </div>
+                    <div style={{ fontSize:11, fontWeight:600, color:'#d1d5db', marginBottom:2 }}>{t}</div>
+                    <div style={{ fontSize:10, color:'#4b5563' }}>{d}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {transAnim && transAnim.fromSrc && (
+            <div style={{ position:'absolute', inset:0, zIndex:50, pointerEvents:'none',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          background:'#12131a',
+                          ...getOutStyle(transAnim),
+                          transition:'opacity .38s ease, transform .38s ease' }}>
+              <img src={transAnim.fromSrc} style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain' }} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showAdd && <AddScreenDialog onAdd={addScreen} onClose={() => setShowAdd(false)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
