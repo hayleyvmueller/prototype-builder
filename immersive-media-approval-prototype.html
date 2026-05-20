@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Immersive Media Approval — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+<style>
+:root {
+  --gray-50:#F8F7F7;--gray-100:#F2F0EF;--gray-200:#E9E7E4;--gray-300:#D3CFCA;
+  --gray-400:#BEB8B0;--gray-500:#AAA197;--gray-600:#958A7F;--gray-700:#726A60;
+  --gray-800:#696159;--gray-900:#544D47;--gray-1000:#3F3B36;--gray-1100:#2C2925;
+  --gray-1200:#1A1816;--gray-white:#FFFFFF;--gray-black:#000000;
+  --red-600:#D92228;--red-700:#BA1B20;--red-100:#FEE2E3;--red-800:#9A1A1E;
+  --blue-100:#E9EFFB;--blue-600:#1E61D9;--blue-800:#15459A;--blue-1000:#0D2C62;
+  --green-100:#E9F6E9;--green-700:#46A758;--green-900:#2A7E3B;--green-1000:#203C25;
+  --orange-200:#FFDFB5;--orange-300:#FFD19A;--orange-1000:#582D1D;
+  --yellow-200:#FFF2D0;--yellow-700:#B49700;--yellow-900:#685700;--yellow-1000:#514400;
+  --purple-200:#F7DEF8;--purple-1000:#53195D;
+  --teal-200:#CCF3F3;--teal-1000:#00615F;
+  --brand:var(--red-600);
+  --bg-base:var(--gray-white);--bg-canvas:var(--gray-50);--bg-action:var(--gray-1000);
+  --bg-action-hover:var(--gray-1200);
+  --border-base:var(--gray-300);--border-bold:var(--gray-1200);
+  --text-base:var(--gray-1200);--text-alternate:var(--gray-700);
+  --shadow-raised:0 0 4px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.16);
+  --shadow-lifted:0 0 8px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.16);
+  --shadow-dialog:0 2px 16px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.16);
+  --radius-200:8px;--radius-300:16px;--radius-400:40px;--radius-500:9999px;
+  --motion-fast:120ms;--motion-medium:220ms;
+  --motion-ease:cubic-bezier(.2,.8,.2,1);--motion-ease-out:cubic-bezier(0,0,.2,1);
+  --font-display:"Galano Grotesque Alt",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-body:var(--font-display);--font-caption:var(--font-display);
+  --font-numeric:var(--font-display);
+  --space-300:8px;--space-500:16px;
+  --weight-semibold:600;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%;min-height:100vh}
+body{font-family:var(--font-body);color:var(--text-base);background:var(--bg-canvas);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+a:hover{color:var(--brand)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-300);
+  font-family:inherit;font-weight:var(--weight-semibold);line-height:1;
+  border-radius:var(--radius-400);border:1px solid transparent;cursor:pointer;
+  white-space:nowrap;text-decoration:none;font-size:16px;padding:12px 24px;height:48px;
+  transition:background var(--motion-fast) var(--motion-ease),color var(--motion-fast) var(--motion-ease),
+  border-color var(--motion-fast) var(--motion-ease),box-shadow var(--motion-fast) var(--motion-ease)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn--sm{font-size:14px;padding:6px 16px;height:36px;gap:6px}
+.btn--xs{font-size:13px;padding:4px 12px;height:30px;gap:6px;border-radius:var(--radius-500)}
+.btn--primary{background:var(--bg-action);color:var(--gray-white);border-color:var(--gray-1000);box-shadow:var(--shadow-raised)}
+.btn--primary:hover:not(:disabled){background:var(--bg-action-hover);border-color:var(--gray-1200);box-shadow:var(--shadow-lifted)}
+.btn--secondary{background:var(--bg-base);color:var(--gray-1200);border-color:var(--border-bold)}
+.btn--secondary:hover:not(:disabled){background:var(--gray-100)}
+.btn--tertiary{background:transparent;color:var(--gray-1200);border-color:transparent;text-decoration:underline;text-underline-offset:4px}
+.btn--tertiary:hover:not(:disabled){background:var(--gray-100)}
+.btn--emphasis{background:var(--brand);color:var(--gray-white);border-color:var(--brand);box-shadow:var(--shadow-raised)}
+.btn--emphasis:hover:not(:disabled){background:var(--red-700);border-color:var(--red-700)}
+.btn--ghost-light{background:rgba(255,255,255,.12);color:var(--gray-white);border-color:rgba(255,255,255,.24);backdrop-filter:blur(8px)}
+.btn--ghost-light:hover:not(:disabled){background:rgba(255,255,255,.2)}
+
+.tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--radius-200);
+  font-size:12px;font-weight:var(--weight-semibold);line-height:16px;white-space:nowrap}
+.tag--new{background:var(--blue-600);color:var(--gray-white)}
+.tag--brand{background:var(--brand);color:var(--gray-white)}
+.tag--neutral{background:var(--gray-100);color:var(--gray-1200);border:1px solid var(--border-base)}
+.tag--green{background:var(--green-100);color:var(--green-900)}
+.tag--purple{background:var(--purple-200);color:var(--purple-1000)}
+.tag--teal{background:var(--teal-200);color:var(--teal-1000)}
+.tag--orange{background:var(--orange-200);color:var(--orange-1000)}
+.tag--ghost-dark{background:rgba(26,24,22,.72);color:var(--gray-white);backdrop-filter:blur(8px)}
+.tag--ghost-light{background:rgba(255,255,255,.92);color:var(--gray-1200);backdrop-filter:blur(8px)}
+
+.eyebrow{font-size:12px;font-weight:var(--weight-semibold);letter-spacing:.6px;text-transform:uppercase;color:var(--brand)}
+.section-heading{font-family:var(--font-display);font-weight:var(--weight-semibold);letter-spacing:-.012em;margin:0}
+.tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.card{background:var(--bg-base);border-radius:var(--radius-300);border:1px solid var(--border-base)}
+
+.pro-shell{background:var(--gray-50);min-height:100%;width:100%}
+.pro-header{background:var(--bg-base);border-bottom:1px solid var(--border-base);padding:16px 32px;display:flex;align-items:center;justify-content:space-between}
+.pro-header__logo{display:flex;align-items:center;gap:8px}
+.pro-header__logo img{height:26px;display:block}
+.pro-header__user{display:flex;align-items:center;gap:12px}
+.pro-header__user-img{width:36px;height:36px;border-radius:var(--radius-500);object-fit:cover}
+
+.media-tile{position:relative;border-radius:var(--radius-300);overflow:hidden;background:var(--gray-100)}
+.media-tile__img{width:100%;height:100%;object-fit:cover;display:block}
+.media-tile__overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.55) 100%);pointer-events:none}
+.media-tile__play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.media-tile__play-btn{width:56px;height:56px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-radius:var(--radius-500);display:flex;align-items:center;justify-content:center;color:var(--gray-1200)}
+.media-tile__tag{position:absolute;top:12px;left:12px;z-index:2}
+.media-tile__duration{position:absolute;bottom:12px;right:12px;z-index:2;font-size:12px;font-weight:var(--weight-semibold);background:rgba(26,24,22,.72);color:var(--gray-white);padding:3px 8px;border-radius:var(--radius-200)}
+
+.approval-row{display:flex;gap:8px;align-items:center}
+.approval-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--radius-500);font-size:13px;font-weight:var(--weight-semibold);border:1px solid var(--border-base);background:var(--bg-base);color:var(--gray-1200);cursor:pointer;font-family:inherit;transition:all var(--motion-fast) var(--motion-ease)}
+.approval-pill:hover{border-color:var(--gray-1000);background:var(--gray-100)}
+.approval-pill--approved{background:var(--green-900);border-color:var(--green-900);color:var(--gray-white)}
+.approval-pill--approved:hover{background:var(--green-1000);border-color:var(--green-1000)}
+.approval-pill--regen{background:var(--yellow-200);border-color:var(--yellow-700);color:var(--yellow-1000)}
+
+.status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:var(--weight-semibold);padding:4px 10px;border-radius:var(--radius-500)}
+.status-dot--approved{background:var(--green-100);color:var(--green-900)}
+.status-dot--pending{background:var(--gray-100);color:var(--gray-1000)}
+.status-dot--regen{background:var(--yellow-200);color:var(--yellow-1000)}
+
+.iconbtn{width:36px;height:36px;border-radius:var(--radius-500);border:0;background:transparent;color:var(--gray-1200);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background var(--motion-fast) var(--motion-ease)}
+.iconbtn:hover{background:var(--gray-100)}
+
+.progress{height:6px;background:var(--gray-200);border-radius:var(--radius-500);overflow:hidden}
+.progress__fill{height:100%;background:var(--green-900);border-radius:var(--radius-500);transition:width var(--motion-medium) var(--motion-ease)}
+
+.banner{border-radius:var(--radius-300);padding:16px 20px;display:flex;align-items:flex-start;gap:12px}
+.banner--info{background:var(--blue-100);color:var(--blue-1000)}
+.banner--success{background:var(--green-100);color:var(--green-1000)}
+.banner__icon{flex-shrink:0}
+.banner__title{font-weight:var(--weight-semibold);font-size:15px;line-height:22px;margin:0 0 4px}
+.banner__body{font-size:14px;line-height:20px}
+
+.compare{position:relative;overflow:hidden;border-radius:var(--radius-200);user-select:none}
+.compare__before,.compare__after{position:absolute;inset:0}
+.compare__after-clip{position:absolute;inset:0;overflow:hidden}
+.compare__handle{position:absolute;top:0;bottom:0;width:2px;background:var(--gray-white);z-index:3;box-shadow:0 0 0 1px rgba(0,0,0,.2),0 2px 8px rgba(0,0,0,.3)}
+.compare__handle::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:999px;background:var(--gray-white);box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.compare__handle::before{content:'‹ ›';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--gray-1200);font-size:18px;font-weight:var(--weight-semibold);z-index:1}
+.compare__label{position:absolute;top:12px;background:rgba(26,24,22,.72);color:var(--gray-white);font-size:11px;font-weight:var(--weight-semibold);letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:var(--radius-200);z-index:4}
+
+.listing-mock{background:var(--bg-base);border-radius:var(--radius-300);overflow:hidden;border:1px solid var(--border-base)}
+
+.property-strip__dot{width:8px;height:8px;border-radius:999px;background:var(--green-700);display:inline-block}
+
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.shimmer{background:linear-gradient(90deg,var(--gray-100) 0%,var(--gray-200) 50%,var(--gray-100) 100%);background-size:800px 100%;animation:shimmer 1.6s infinite linear}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(1.4)}}
+.pulse-dot{width:8px;height:8px;border-radius:999px;background:var(--yellow-700);animation:pulse-dot 1.6s ease-in-out infinite}
+@keyframes modal-fade{from{opacity:0}to{opacity:1}}
+@keyframes toast-in{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+// ─── Unsplash imagery ──────────────────────────────────────────────
+const U = (id, w = 1200, h = 800) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
+
+const IMG = {
+  exteriorDay:   U('photo-1568605114967-8130f3a36994', 1280, 800),
+  exteriorDusk:  U('photo-1600585154340-be6161a56a0c', 1280, 800),
+  exteriorNight: U('photo-1564013799919-ab600027ffc6', 1280, 800),
+  livingEmpty:   U('photo-1493663284031-b7e3aefcae8e', 1200, 800),
+  livingScandi:  U('photo-1586023492125-27b2c045efd7', 1200, 800),
+  livingModern:  U('photo-1618219740975-d40978bb7378', 1200, 800),
+  livingClassic: U('photo-1567767292278-a4f21aa2d36e', 1200, 800),
+  kitchen:       U('photo-1556909114-f6e7ad7d3136', 1200, 800),
+  kitchenBright: U('photo-1556912173-3bb406ef7e77', 1200, 800),
+  bedroom:       U('photo-1505691938895-1758d7feb511', 1200, 800),
+  bedroom2:      U('photo-1522708323590-d24dbb6b0267', 1200, 800),
+  dining:        U('photo-1565538810643-b5bdb714032a', 1200, 800),
+  bathroom:      U('photo-1552321554-5fefe8c9ef14', 1200, 800),
+  exteriorBack:  U('photo-1600596542815-ffad4c1539a9', 1200, 800),
+  social1:       U('photo-1600607687939-ce8a6c25118c', 600, 1066),
+  social2:       U('photo-1600210492486-724fe5c67fb0', 600, 1066),
+  agent:         U('photo-1573497019940-1c28c88b4f3e', 200, 200),
+};
+
+// ─── Mock media bundle ─────────────────────────────────────────────
+const MEDIA = [
+  { id:'hero-video', kind:'hero', type:'Cinematic walkthrough', title:'Hero video',
+    subtitle:'A 42-second narrated walkthrough — exterior to backyard.',
+    duration:'0:42', thumb:IMG.exteriorDay, badge:'Featured', aspect:'16/9', status:'pending' },
+  { id:'stage-living', kind:'staging', type:'Virtual staging', title:'Living room · staged',
+    subtitle:'Empty room furnished in the "Modern warm" style preset.',
+    thumb:IMG.livingScandi, before:IMG.livingEmpty, after:IMG.livingScandi, aspect:'4/3', status:'pending' },
+  { id:'stage-dining', kind:'staging', type:'Virtual staging', title:'Dining area · staged',
+    subtitle:'Added a 6-seat dining set + pendant lighting.',
+    thumb:IMG.dining, before:IMG.livingEmpty, after:IMG.dining, aspect:'4/3', status:'pending' },
+  { id:'stage-bedroom', kind:'staging', type:'Virtual staging', title:'Primary bedroom · staged',
+    subtitle:'"Modern warm" — neutral linens, oak headboard.',
+    thumb:IMG.bedroom, before:IMG.livingEmpty, after:IMG.bedroom, aspect:'4/3', status:'pending' },
+  { id:'lighting-exterior', kind:'lighting', type:'Day → dusk', title:'Exterior at dusk',
+    subtitle:'Warm window glow added to the front elevation.',
+    thumb:IMG.exteriorDusk, before:IMG.exteriorDay, after:IMG.exteriorDusk, aspect:'16/10', status:'pending' },
+  { id:'social-1', kind:'social', type:'Social clip', title:'15s · Vertical',
+    subtitle:'For Instagram Reels, TikTok, YouTube Shorts.',
+    duration:'0:15', thumb:IMG.social1, aspect:'9/16', status:'pending' },
+  { id:'social-2', kind:'social', type:'Social clip', title:'15s · Story',
+    subtitle:'Vertical with caption overlay — "New listing."',
+    duration:'0:15', thumb:IMG.social2, aspect:'9/16', status:'pending' },
+];
+
+const KIND_META = {
+  hero:     { label:'Hero video',      tag:'brand'  },
+  staging:  { label:'Virtual staging', tag:'purple' },
+  lighting: { label:'Day → dusk',      tag:'orange' },
+  social:   { label:'Social clip',     tag:'teal'   },
+};
+
+const PROPERTY = {
+  address:'123 Main Street', city:'Austin, TX 78701', price:'$365,000',
+  beds:3, baths:2.5, sqft:'1,870', status:'For sale', mls:'12345678',
+  agent:{ name:'Kelly Park', avatar:IMG.agent },
+};
+
+// ─── Icons ─────────────────────────────────────────────────────────
+function Icon({ name, size = 20, stroke = 2 }) {
+  const props = { width:size, height:size, viewBox:'0 0 24 24',
+    fill:'none', stroke:'currentColor', strokeWidth:stroke,
+    strokeLinecap:'round', strokeLinejoin:'round' };
+  const paths = {
+    play: <polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/>,
+    check: <polyline points="20 6 9 17 4 12"/>,
+    x: <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+    refresh: <><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></>,
+    arrowLeft: <><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></>,
+    arrowRight: <><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></>,
+    eye: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>,
+    sparkles: <><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" fill="currentColor"/><path d="M19 14l.75 2.25L22 17l-2.25.75L19 20l-.75-2.25L16 17l2.25-.75L19 14z" fill="currentColor"/></>,
+    info: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>,
+    video: <><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></>,
+    image: <><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></>,
+    moon: <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>,
+    phone: <><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></>,
+    expand: <><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></>,
+    mail: <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></>,
+    heart: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>,
+    pause: <><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></>,
+    bell: <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></>,
+    download: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>,
+    share: <><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></>,
+    chart: <><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></>,
+    layers: <><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></>,
+    music: <><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></>,
+    plus: <><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+  };
+  return <svg {...props}>{paths[name]}</svg>;
+}
+
+// ─── Shared components ─────────────────────────────────────────────
+function ProHeader() {
+  return (
+    <div className="pro-header">
+      <div className="pro-header__logo">
+        <img src="assets/realtor-pro-lockup.png" alt="realtor.com Pro" />
+      </div>
+      <div className="pro-header__user">
+        <button className="iconbtn"><Icon name="bell" size={20}/></button>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <span style={{fontSize:13,fontWeight:500}}>Kelly Park</span>
+          <img className="pro-header__user-img" src={IMG.agent} alt=""/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CompareSlider({ before, after, height = 320, beforeLabel = 'Before', afterLabel = 'After' }) {
+  const [pos, setPos] = useState(50);
+  const ref = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const onMove = (e) => {
+    if (!ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    const clientX = e.clientX ?? (e.touches?.[0]?.clientX);
+    if (clientX == null) return;
+    setPos(Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100)));
+  };
+  useEffect(() => {
+    if (!dragging) return;
+    const up = () => setDragging(false);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', up);
+    window.addEventListener('touchmove', onMove);
+    window.addEventListener('touchend', up);
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', up);
+      window.removeEventListener('touchmove', onMove); window.removeEventListener('touchend', up); };
+  }, [dragging]);
+  return (
+    <div ref={ref} className="compare" style={{height,cursor:'ew-resize'}}
+         onMouseDown={e=>{setDragging(true);onMove(e)}} onTouchStart={e=>{setDragging(true);onMove(e)}}>
+      <img className="compare__before" src={before} style={{width:'100%',height:'100%',objectFit:'cover'}} alt=""/>
+      <div className="compare__after-clip" style={{width:pos+'%'}}>
+        <img src={after} style={{width:(100/(pos/100))+'%',height:'100%',objectFit:'cover',position:'absolute',inset:0}} alt=""/>
+      </div>
+      <div className="compare__label" style={{left:12}}>{afterLabel}</div>
+      <div className="compare__label" style={{right:12}}>{beforeLabel}</div>
+      <div className="compare__handle" style={{left:`calc(${pos}% - 1px)`}}/>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PROTOTYPE ROOT
+// ═══════════════════════════════════════════════════════════════════
+function Prototype() {
+  const [screen, setScreen] = useState(() => localStorage.getItem('proto.screen') || 'email');
+  const [statuses, setStatuses] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('proto.statuses')) || initialStatuses(); }
+    catch { return initialStatuses(); }
+  });
+  const [regenMeta, setRegenMeta] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('proto.regenMeta')) || {}; }
+    catch { return {}; }
+  });
+
+  useEffect(() => { localStorage.setItem('proto.screen', screen); }, [screen]);
+  useEffect(() => { localStorage.setItem('proto.statuses', JSON.stringify(statuses)); }, [statuses]);
+  useEffect(() => { localStorage.setItem('proto.regenMeta', JSON.stringify(regenMeta)); }, [regenMeta]);
+
+  const [toasts, setToasts] = useState([]);
+  const toast = useCallback((msg, opts = {}) => {
+    const id = Math.random().toString(36).slice(2);
+    setToasts(t => [...t, { id, msg, ...opts }]);
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), opts.duration || 3500);
+  }, []);
+
+  const [modal, setModal] = useState(null);
+  const open = (type, payload) => setModal({ type, payload });
+  const close = () => setModal(null);
+
+  const setStatus = useCallback((id, s) => {
+    setStatuses(p => ({ ...p, [id]: s }));
+  }, []);
+
+  const startRegen = useCallback((id, settings) => {
+    setStatus(id, 'regen');
+    setRegenMeta(m => ({ ...m, [id]: { startedAt: Date.now(), settings } }));
+    toast(`Regenerating "${MEDIA.find(m => m.id === id).title}" — we'll let you know when it's ready.`);
+    setTimeout(() => {
+      setStatus(id, 'regenerated');
+      setRegenMeta(m => ({ ...m, [id]: { ...m[id], completedAt: Date.now() } }));
+      toast(`New version of "${MEDIA.find(m => m.id === id).title}" is ready to review.`, { kind: 'success' });
+    }, 3200);
+  }, [setStatus, toast]);
+
+  const resetAll = useCallback(() => {
+    setStatuses(initialStatuses());
+    setRegenMeta({});
+    setScreen('email');
+    toast('Demo reset.', { duration: 1800 });
+  }, [toast]);
+
+  useEffect(() => {
+    const k = (e) => { if (e.key === 'Escape' && modal) close(); };
+    window.addEventListener('keydown', k);
+    return () => window.removeEventListener('keydown', k);
+  }, [modal]);
+
+  return (
+    <>
+      <div style={{position:'fixed',top:12,right:12,zIndex:9999,display:'flex',gap:6,alignItems:'center',
+        background:'rgba(26,24,22,0.85)',color:'#fff',borderRadius:999,padding:'6px 6px 6px 12px',
+        fontSize:12,fontWeight:500,backdropFilter:'blur(8px)'}}>
+        <span style={{opacity:.6}}>Prototype</span>
+        <button onClick={resetAll} style={{background:'rgba(255,255,255,.15)',color:'#fff',border:0,
+          borderRadius:999,padding:'4px 10px',fontSize:11,fontWeight:600,cursor:'pointer'}}>↻ Reset</button>
+      </div>
+
+      {screen === 'email' && <EmailScreen onOpen={() => setScreen('gallery')}/>}
+      {screen === 'gallery' && (
+        <GalleryScreen statuses={statuses} regenMeta={regenMeta} setStatus={setStatus}
+          startRegen={startRegen} open={open} toast={toast}
+          onPublish={() => setScreen('publishConfirm')}
+          onBuyerPreview={() => setScreen('buyerPreview')}
+          onExit={() => setScreen('email')}/>
+      )}
+      {screen === 'buyerPreview' && <BuyerPreviewScreen statuses={statuses} onBack={() => setScreen('gallery')}/>}
+      {screen === 'publishConfirm' && <PublishConfirmScreen statuses={statuses} onCancel={() => setScreen('gallery')} onConfirm={() => setScreen('publishSuccess')}/>}
+      {screen === 'publishSuccess' && <PublishSuccessScreen statuses={statuses} onView={() => setScreen('buyerPreview')} onRestart={resetAll}/>}
+
+      {modal && (
+        <Modal onClose={close}>
+          {modal.type === 'player' && <HeroPlayerModal m={modal.payload} onClose={close}/>}
+          {modal.type === 'regen' && <RegenModal m={modal.payload} onConfirm={(s) => { startRegen(modal.payload.id, s); close(); }} onClose={close}/>}
+          {modal.type === 'compare' && <CompareModal m={modal.payload} onClose={close}/>}
+          {modal.type === 'ai' && <AiDetailsModal m={modal.payload} onClose={close}/>}
+        </Modal>
+      )}
+
+      <ToastStack toasts={toasts}/>
+    </>
+  );
+}
+
+function initialStatuses() {
+  const s = {};
+  MEDIA.forEach(m => { s[m.id] = 'pending'; });
+  return s;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// EMAIL SCREEN
+// ═══════════════════════════════════════════════════════════════════
+function EmailScreen({ onOpen }) {
+  return (
+    <div style={{minHeight:'100vh',width:'100%',background:'linear-gradient(180deg,#ede9e2 0%,#f0eee9 100%)',
+      display:'flex',alignItems:'center',justifyContent:'center',padding:32}}>
+      <div style={{width:'100%',maxWidth:580}}>
+        <div style={{textAlign:'center',marginBottom:20,fontSize:12,fontWeight:600,color:'var(--gray-700)',
+          textTransform:'uppercase',letterSpacing:'0.08em'}}>You've received an email</div>
+        <div style={{background:'var(--bg-base)',border:'1px solid var(--border-base)',borderRadius:16,
+          overflow:'hidden',boxShadow:'var(--shadow-dialog)'}}>
+          <div style={{background:'var(--gray-100)',padding:'14px 20px',borderBottom:'1px solid var(--border-base)',
+            display:'flex',alignItems:'center',gap:10}}>
+            <div style={{display:'flex',gap:6}}>
+              <div style={{width:10,height:10,borderRadius:999,background:'#FF5F57'}}/>
+              <div style={{width:10,height:10,borderRadius:999,background:'#FEBC2E'}}/>
+              <div style={{width:10,height:10,borderRadius:999,background:'#28C840'}}/>
+            </div>
+            <Icon name="mail" size={14}/>
+            <span style={{fontSize:12,color:'var(--gray-700)'}}>Inbox · 1 new</span>
+          </div>
+          <div style={{padding:'24px 28px 18px',borderBottom:'1px solid var(--border-base)'}}>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:6}}>
+              <img src="assets/logo-mark.svg" style={{width:32,height:32}} alt=""/>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:600}}>realtor.com Pro</div>
+                <div style={{fontSize:11,color:'var(--gray-700)'}}>media@realtor.com · to Kelly Park</div>
+              </div>
+              <div style={{fontSize:11,color:'var(--gray-700)'}}>Today, 10:14 AM</div>
+            </div>
+            <div className="section-heading" style={{fontSize:20,lineHeight:'26px',margin:'12px 0 0'}}>
+              Your immersive media is ready to review
+            </div>
+          </div>
+          <div style={{padding:'24px 28px 28px'}}>
+            <div style={{background:`url(${IMG.exteriorDay}) center/cover`,height:200,borderRadius:12,
+              position:'relative',marginBottom:20}}>
+              <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,transparent 50%,rgba(0,0,0,.6))',borderRadius:12}}/>
+              <div style={{position:'absolute',top:12,left:12,background:'var(--brand)',color:'#fff',
+                padding:'4px 10px',borderRadius:999,fontSize:11,fontWeight:600,textTransform:'uppercase',
+                letterSpacing:'0.06em',display:'inline-flex',alignItems:'center',gap:4}}>
+                <Icon name="sparkles" size={11}/> 7 new assets
+              </div>
+              <div style={{position:'absolute',bottom:12,left:16,color:'#fff'}}>
+                <div style={{fontSize:16,fontWeight:600}}>123 Main Street</div>
+                <div className="tnum" style={{fontSize:12,opacity:.9}}>$365,000 · Austin, TX 78701</div>
+              </div>
+            </div>
+            <p style={{fontSize:15,lineHeight:1.55,color:'var(--gray-1200)',margin:0}}>Hi Kelly,</p>
+            <p style={{fontSize:15,lineHeight:1.55,color:'var(--gray-1200)',marginTop:12}}>
+              We finished enhancing your photos for <strong>123 Main Street</strong>. Take a quick look — your immersive media will only go live on the Spotlight listing detail page after you approve it.
+            </p>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,margin:'16px 0 20px'}}>
+              <EmailThumb label="Hero video" duration="0:42" thumb={IMG.exteriorDay} play/>
+              <EmailThumb label="Staged living" thumb={IMG.livingScandi}/>
+              <EmailThumb label="Dusk exterior" thumb={IMG.exteriorDusk}/>
+              <EmailThumb label="+4 more"/>
+            </div>
+            <button className="btn btn--primary" style={{width:'100%'}} onClick={onOpen}>
+              Review my media <Icon name="arrowRight" size={16}/>
+            </button>
+            <div style={{fontSize:12,color:'var(--gray-700)',textAlign:'center',marginTop:12}}>
+              We'll hold these for 30 days. No action needed if you'd rather skip.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmailThumb({ label, duration, thumb, play }) {
+  return (
+    <div style={{aspectRatio:'4/3',borderRadius:8,overflow:'hidden',
+      background:thumb?`url(${thumb}) center/cover`:'var(--gray-100)',position:'relative',
+      border:'1px solid var(--border-base)'}}>
+      <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,transparent 50%,rgba(0,0,0,.55))'}}/>
+      {play && <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',
+        width:30,height:30,borderRadius:999,background:'rgba(255,255,255,.92)',display:'flex',
+        alignItems:'center',justifyContent:'center',color:'var(--gray-1200)'}}><Icon name="play" size={12}/></div>}
+      <div style={{position:'absolute',bottom:6,left:8,color:'#fff',fontSize:10,fontWeight:600}}>{label}</div>
+      {duration && <div style={{position:'absolute',top:6,right:6,color:'#fff',background:'rgba(0,0,0,.5)',
+        fontSize:10,padding:'2px 6px',borderRadius:4}}>{duration}</div>}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GALLERY SCREEN
+// ═══════════════════════════════════════════════════════════════════
+function GalleryScreen({ statuses, regenMeta, setStatus, startRegen, open, toast, onPublish, onBuyerPreview, onExit }) {
+  const counts = useMemo(() => {
+    const c = { approved:0, regen:0, regenerated:0, pending:0 };
+    Object.values(statuses).forEach(s => c[s]++);
+    return c;
+  }, [statuses]);
+
+  const total = MEDIA.length;
+  const decided = counts.approved + counts.regen + counts.regenerated;
+  const allApproved = counts.approved === total;
+  const canPublish = counts.approved > 0;
+
+  const approveAll = () => {
+    const next = { ...statuses };
+    MEDIA.forEach(m => { if (next[m.id] === 'pending' || next[m.id] === 'regenerated') next[m.id] = 'approved'; });
+    Object.entries(next).forEach(([k, v]) => setStatus(k, v));
+    toast(`Approved ${MEDIA.length - counts.approved} remaining assets.`, { kind: 'success' });
+  };
+
+  return (
+    <div className="pro-shell" style={{minHeight:'100vh'}}>
+      <ProHeader/>
+      <div style={{maxWidth:1180,margin:'0 auto',padding:'20px 32px 0'}}>
+        <button onClick={onExit} style={{background:'transparent',border:0,padding:0,display:'inline-flex',
+          alignItems:'center',gap:6,color:'var(--gray-1000)',fontSize:14,fontWeight:500,cursor:'pointer'}}>
+          <Icon name="arrowLeft" size={16}/> All listings
+        </button>
+      </div>
+
+      <div style={{maxWidth:1180,margin:'0 auto',padding:'12px 32px 0'}}>
+        <div style={{display:'flex',alignItems:'flex-start',gap:16,flex:1,minWidth:0}}>
+          <img src={IMG.exteriorDay} style={{width:132,height:100,borderRadius:12,objectFit:'cover',flexShrink:0}} alt=""/>
+          <div style={{minWidth:0}}>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <span className="property-strip__dot"/>
+              <span style={{fontSize:13,color:'var(--gray-700)',fontWeight:500}}>For sale</span>
+            </div>
+            <h1 className="section-heading" style={{fontSize:26,lineHeight:'32px',margin:'4px 0 6px'}}>
+              {PROPERTY.address}, {PROPERTY.city}
+            </h1>
+            <div className="tnum" style={{display:'flex',gap:12,fontSize:14,color:'var(--gray-800)'}}>
+              <strong style={{color:'var(--gray-1200)'}}>{PROPERTY.price}</strong>
+              <span>·</span><span>Listed Oct 1 (9 days ago)</span><span>·</span><span>MLS {PROPERTY.mls}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style={{display:'flex',gap:28,marginTop:24,borderBottom:'1px solid var(--border-base)',overflowX:'auto'}}>
+          {['Performance','Matching buyers','Promotions','Listing details','Immersive media'].map(t => (
+            <div key={t} style={{padding:'12px 0',fontSize:14,fontWeight:600,
+              color:t==='Immersive media'?'var(--gray-1200)':'var(--gray-700)',
+              borderBottom:t==='Immersive media'?'2px solid var(--gray-1200)':'2px solid transparent',
+              marginBottom:-1,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,whiteSpace:'nowrap'}}>
+              {t}
+              {t === 'Immersive media' && <span className="tag tag--new" style={{padding:'2px 8px',fontSize:11}}>New</span>}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{maxWidth:1180,margin:'24px auto 0',padding:'0 32px'}}>
+        {allApproved ? (
+          <div className="banner banner--success">
+            <div className="banner__icon"><Icon name="check" size={22}/></div>
+            <div style={{flex:1}}>
+              <div className="banner__title">All {total} enhancements approved — ready to publish</div>
+              <div className="banner__body">Buyers will start seeing these on your Spotlight listing within ~15 minutes of publish.</div>
+            </div>
+            <button className="btn btn--sm btn--primary" onClick={onPublish}>Publish to listing</button>
+          </div>
+        ) : (
+          <div className="banner banner--info" style={{background:'var(--blue-100)'}}>
+            <div className="banner__icon"><Icon name="sparkles" size={22}/></div>
+            <div style={{flex:1}}>
+              <div className="banner__title">Your immersive media is ready to review</div>
+              <div className="banner__body">We generated {total} enhanced assets from the 13 photos you uploaded. Review each one below — buyers will only see what you approve.</div>
+            </div>
+            <button className="btn btn--sm btn--secondary" style={{flexShrink:0}} onClick={onBuyerPreview}>
+              <Icon name="eye" size={16}/> Buyer preview
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div style={{position:'sticky',top:0,zIndex:50,maxWidth:1180,margin:'20px auto 0',padding:'0 32px'}}>
+        <div style={{background:'var(--bg-base)',border:'1px solid var(--border-base)',borderRadius:16,
+          padding:'14px 18px',display:'flex',alignItems:'center',justifyContent:'space-between',
+          boxShadow:'var(--shadow-raised)',gap:16}}>
+          <div style={{display:'flex',alignItems:'center',gap:20,flex:1,minWidth:0}}>
+            <div>
+              <div style={{fontSize:12,color:'var(--gray-700)',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em'}}>Review progress</div>
+              <div style={{display:'flex',alignItems:'baseline',gap:6,marginTop:2}}>
+                <span className="tnum" style={{fontFamily:'var(--font-display)',fontSize:22,fontWeight:600,color:'var(--gray-1200)'}}>
+                  {decided}<span style={{color:'var(--gray-600)'}}>/{total}</span>
+                </span>
+                <span style={{fontSize:13,color:'var(--gray-700)'}}>reviewed</span>
+              </div>
+            </div>
+            <div style={{flex:1,maxWidth:360}}>
+              <div className="progress"><div className="progress__fill" style={{width:`${(decided/total)*100}%`}}/></div>
+            </div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              {counts.approved > 0 && <span className="status-dot status-dot--approved"><Icon name="check" size={12} stroke={3}/> {counts.approved} approved</span>}
+              {counts.regen > 0 && <span className="status-dot status-dot--regen"><span className="pulse-dot"/> {counts.regen} regenerating</span>}
+              {counts.regenerated > 0 && <span className="status-dot" style={{background:'var(--blue-100)',color:'var(--blue-800)'}}><Icon name="sparkles" size={12}/> {counts.regenerated} new version</span>}
+              {counts.pending > 0 && <span className="status-dot status-dot--pending">{counts.pending} pending</span>}
+            </div>
+          </div>
+          <div style={{display:'flex',gap:8}}>
+            <button className="btn btn--sm btn--tertiary" onClick={approveAll} disabled={counts.approved===total}>Approve all remaining</button>
+            <button className="btn btn--sm btn--primary" disabled={!canPublish} onClick={onPublish}>
+              {allApproved ? 'Publish to listing' : `Publish ${counts.approved} approved`}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:1180,margin:'24px auto 0',padding:'0 32px 64px'}}>
+        <MediaGroup title="Hero video" subtitle="A cinematic 30–60s walkthrough — the headline of your listing." icon="video"
+          items={MEDIA.filter(m=>m.kind==='hero')} statuses={statuses} regenMeta={regenMeta} setStatus={setStatus} open={open} layout="hero"/>
+        <MediaGroup title="Virtual staging" subtitle="Empty rooms furnished by AI. Original photos remain untouched." icon="layers"
+          items={MEDIA.filter(m=>m.kind==='staging')} statuses={statuses} regenMeta={regenMeta} setStatus={setStatus} open={open} layout="grid"/>
+        <MediaGroup title="Day → dusk" subtitle="Soft evening lighting added to exterior shots." icon="moon"
+          items={MEDIA.filter(m=>m.kind==='lighting')} statuses={statuses} regenMeta={regenMeta} setStatus={setStatus} open={open} layout="grid"/>
+        <MediaGroup title="Social clips" subtitle="Vertical 15s cuts for Reels, TikTok and Shorts." icon="phone"
+          items={MEDIA.filter(m=>m.kind==='social')} statuses={statuses} regenMeta={regenMeta} setStatus={setStatus} open={open} layout="social"/>
+        <BuyerPreviewTeaser statuses={statuses} onOpen={onBuyerPreview}/>
+      </div>
+    </div>
+  );
+}
+
+function MediaGroup({ title, subtitle, icon, items, statuses, regenMeta, setStatus, open, layout }) {
+  const approved = items.filter(i => statuses[i.id] === 'approved').length;
+  return (
+    <section style={{marginTop:32}}>
+      <div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',marginBottom:16}}>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
+          <div style={{width:40,height:40,borderRadius:12,background:'var(--gray-100)',
+            display:'flex',alignItems:'center',justifyContent:'center',color:'var(--gray-1200)'}}>
+            <Icon name={icon} size={20}/>
+          </div>
+          <div>
+            <h2 className="section-heading" style={{fontSize:20,lineHeight:'24px',margin:0}}>{title}</h2>
+            <div style={{fontSize:13,color:'var(--gray-700)',marginTop:2}}>{subtitle}</div>
+          </div>
+        </div>
+        <div className="tnum" style={{fontSize:13,color:'var(--gray-700)'}}>
+          <strong style={{color:'var(--gray-1200)'}}>{approved}</strong>/{items.length} approved
+        </div>
+      </div>
+      {layout === 'hero' && <div style={{display:'grid',gridTemplateColumns:'1.4fr 1fr',gap:24}}>
+        {items.map(m => <HeroCard key={m.id} m={m} status={statuses[m.id]} setStatus={setStatus} open={open}/>)}
+      </div>}
+      {layout === 'grid' && <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}}>
+        {items.map(m => <StagingCard key={m.id} m={m} status={statuses[m.id]} setStatus={setStatus} open={open}/>)}
+      </div>}
+      {layout === 'social' && <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16}}>
+        {items.map(m => <SocialCard key={m.id} m={m} status={statuses[m.id]} setStatus={setStatus} open={open}/>)}
+      </div>}
+    </section>
+  );
+}
+
+function HeroCard({ m, status, setStatus, open }) {
+  return (
+    <div className="card" style={{overflow:'hidden'}}>
+      <div className="media-tile" style={{aspectRatio:'16/9',cursor:status==='regen'?'default':'pointer'}}
+           onClick={() => status !== 'regen' && open('player', m)}>
+        {status === 'regen' ? <RegenTile aspect="16/9"/> : (<>
+          <img className="media-tile__img" src={m.thumb} alt=""/>
+          <div className="media-tile__overlay"/>
+          <div className="media-tile__play"><div className="media-tile__play-btn"><Icon name="play" size={22}/></div></div>
+          <span className="tag tag--brand media-tile__tag"><Icon name="sparkles" size={12}/> {KIND_META[m.kind].label}</span>
+          {status === 'regenerated' && <NewVersionBadge/>}
+          <span className="media-tile__duration tnum">{m.duration}</span>
+        </>)}
+      </div>
+      <div style={{padding:'16px 20px 18px'}}>
+        <div style={{fontSize:16,fontWeight:600,color:'var(--gray-1200)'}}>{m.title}</div>
+        <div style={{fontSize:14,color:'var(--gray-700)',marginTop:4}}>{m.subtitle}</div>
+        <button onClick={() => open('ai', m)} style={{marginTop:12,background:'transparent',border:0,padding:0,
+          color:'var(--gray-800)',fontSize:13,fontWeight:500,display:'inline-flex',alignItems:'center',gap:6,cursor:'pointer',fontFamily:'inherit'}}>
+          <Icon name="info" size={14}/> What did AI change?
+        </button>
+        <div style={{marginTop:16}}>
+          <ApprovalActions m={m} status={status} setStatus={setStatus} open={open}/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StagingCard({ m, status, setStatus, open }) {
+  const [showCompare, setShowCompare] = useState(false);
+  return (
+    <div className="card" style={{overflow:'hidden'}}>
+      <div style={{position:'relative'}}>
+        {status === 'regen' ? <RegenTile aspect={m.aspect}/> : (
+          showCompare && m.before
+            ? <CompareSlider before={m.before} after={m.after} height={220}/>
+            : <div className="media-tile" style={{aspectRatio:m.aspect,cursor:'pointer'}} onClick={() => open('compare', m)}>
+                <img className="media-tile__img" src={m.thumb} alt=""/>
+                <span className={`tag tag--${KIND_META[m.kind].tag} media-tile__tag`}><Icon name="sparkles" size={12}/> {KIND_META[m.kind].label}</span>
+                {status === 'regenerated' && <NewVersionBadge/>}
+              </div>
+        )}
+        {m.before && status !== 'regen' && (
+          <button onClick={() => setShowCompare(s => !s)} className="tag tag--ghost-light"
+            style={{position:'absolute',bottom:12,right:12,border:0,cursor:'pointer',padding:'6px 12px',boxShadow:'var(--shadow-raised)'}}>
+            {showCompare ? 'Hide compare' : 'Compare'}
+          </button>
+        )}
+      </div>
+      <div style={{padding:'14px 16px 16px'}}>
+        <div style={{fontSize:14,fontWeight:600,color:'var(--gray-1200)'}}>{m.title}</div>
+        <div style={{fontSize:12,color:'var(--gray-700)',marginTop:2,lineHeight:1.4}}>{m.subtitle}</div>
+        <div style={{marginTop:12}}><ApprovalActions m={m} status={status} setStatus={setStatus} open={open}/></div>
+      </div>
+    </div>
+  );
+}
+
+function SocialCard({ m, status, setStatus, open }) {
+  return (
+    <div className="card" style={{overflow:'hidden'}}>
+      <div className="media-tile" style={{aspectRatio:'9/16',maxHeight:320,cursor:status==='regen'?'default':'pointer'}}
+           onClick={() => status !== 'regen' && open('player', m)}>
+        {status === 'regen' ? <RegenTile aspect="9/16"/> : (<>
+          <img className="media-tile__img" src={m.thumb} alt=""/>
+          <div className="media-tile__overlay"/>
+          <div className="media-tile__play"><div className="media-tile__play-btn"><Icon name="play" size={20}/></div></div>
+          <span className={`tag tag--${KIND_META[m.kind].tag} media-tile__tag`}>9:16</span>
+          {status === 'regenerated' && <NewVersionBadge/>}
+          <span className="media-tile__duration tnum">{m.duration}</span>
+        </>)}
+      </div>
+      <div style={{padding:'12px 14px 14px'}}>
+        <div style={{fontSize:13,fontWeight:600,color:'var(--gray-1200)'}}>{m.title}</div>
+        <div style={{fontSize:12,color:'var(--gray-700)',marginTop:2}}>{m.subtitle}</div>
+        <div style={{marginTop:10}}><ApprovalActions m={m} status={status} setStatus={setStatus} open={open}/></div>
+      </div>
+    </div>
+  );
+}
+
+function NewVersionBadge() {
+  return (
+    <span style={{position:'absolute',top:12,right:12,zIndex:2,background:'var(--blue-600)',color:'#fff',
+      padding:'4px 10px',borderRadius:999,fontSize:11,fontWeight:600,display:'inline-flex',alignItems:'center',gap:4}}>
+      <Icon name="sparkles" size={11}/> New version
+    </span>
+  );
+}
+
+function ApprovalActions({ m, status, setStatus, open }) {
+  if (status === 'approved') return (
+    <div className="approval-row">
+      <button className="approval-pill approval-pill--approved" onClick={() => setStatus(m.id, 'pending')}>
+        <Icon name="check" size={14} stroke={3}/> Approved
+      </button>
+      <button className="approval-pill" onClick={() => open('regen', m)}><Icon name="refresh" size={14}/> Regenerate</button>
+    </div>
+  );
+  if (status === 'regen') return (
+    <div className="approval-row">
+      <button className="approval-pill approval-pill--regen" disabled style={{opacity:1,cursor:'default'}}>
+        <span className="pulse-dot"/> Regenerating…
+      </button>
+    </div>
+  );
+  if (status === 'regenerated') return (
+    <div className="approval-row">
+      <button className="approval-pill" onClick={() => setStatus(m.id, 'approved')}
+        style={{background:'var(--gray-1000)',color:'var(--gray-white)',borderColor:'var(--gray-1000)'}}>
+        <Icon name="check" size={14} stroke={3}/> Approve new
+      </button>
+      <button className="approval-pill" onClick={() => open('regen', m)}><Icon name="refresh" size={14}/> Try again</button>
+    </div>
+  );
+  return (
+    <div className="approval-row">
+      <button className="approval-pill" onClick={() => setStatus(m.id, 'approved')}
+        style={{background:'var(--gray-1000)',color:'var(--gray-white)',borderColor:'var(--gray-1000)'}}>
+        <Icon name="check" size={14} stroke={3}/> Approve
+      </button>
+      <button className="approval-pill" onClick={() => open('regen', m)}><Icon name="refresh" size={14}/> Regenerate</button>
+    </div>
+  );
+}
+
+function RegenTile({ aspect = '16/9' }) {
+  return (
+    <div className="media-tile shimmer" style={{aspectRatio:aspect,display:'flex',alignItems:'center',
+      justifyContent:'center',flexDirection:'column',gap:8}}>
+      <Icon name="sparkles" size={28} stroke={1.8}/>
+      <div style={{fontSize:13,fontWeight:600,color:'var(--gray-900)'}}>Regenerating…</div>
+      <div className="tnum" style={{fontSize:11,color:'var(--gray-700)'}}>~30 seconds</div>
+    </div>
+  );
+}
+
+function BuyerPreviewTeaser({ statuses, onOpen }) {
+  const approvedCount = Object.values(statuses).filter(s => s === 'approved').length;
+  return (
+    <section style={{marginTop:48}}>
+      <div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',marginBottom:16}}>
+        <div>
+          <h2 className="section-heading" style={{fontSize:20,lineHeight:'24px',margin:0}}>How buyers will see this</h2>
+          <div style={{fontSize:13,color:'var(--gray-700)',marginTop:4}}>
+            A preview of your Spotlight listing detail page with{' '}
+            <strong style={{color:'var(--gray-1200)'}}>{approvedCount} approved</strong> enhancement{approvedCount===1?'':'s'}.
+          </div>
+        </div>
+        <button className="btn btn--sm btn--secondary" onClick={onOpen}><Icon name="expand" size={16}/> Open full preview</button>
+      </div>
+      <div className="listing-mock" style={{cursor:'pointer'}} onClick={onOpen}>
+        <div style={{display:'grid',gridTemplateColumns:'1.6fr 1fr 1fr',gap:6,padding:6,background:'var(--gray-100)'}}>
+          <div style={{background:`url(${IMG.exteriorDay}) center/cover`,borderRadius:8,aspectRatio:'16/10',position:'relative'}}>
+            <div style={{position:'absolute',bottom:12,left:12,background:'rgba(26,24,22,.72)',backdropFilter:'blur(8px)',
+              color:'#fff',borderRadius:999,padding:'8px 16px',fontSize:13,fontWeight:600,display:'inline-flex',alignItems:'center',gap:8}}>
+              <Icon name="play" size={14}/> Watch cinematic tour · 0:42
+            </div>
+            <div style={{position:'absolute',top:12,left:12,display:'inline-flex',alignItems:'center',gap:6,
+              background:'var(--brand)',color:'#fff',padding:'4px 10px',borderRadius:999,fontSize:11,fontWeight:600,
+              textTransform:'uppercase',letterSpacing:'0.06em'}}><Icon name="sparkles" size={12}/> Spotlight listing</div>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:6}}>
+            <div style={{background:`url(${IMG.livingScandi}) center/cover`,borderRadius:8,aspectRatio:'16/10'}}/>
+            <div style={{background:`url(${IMG.kitchen}) center/cover`,borderRadius:8,aspectRatio:'16/10'}}/>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:6}}>
+            <div style={{background:`url(${IMG.exteriorDusk}) center/cover`,borderRadius:8,aspectRatio:'16/10',position:'relative'}}>
+              <div style={{position:'absolute',top:8,left:8,background:'rgba(255,255,255,.92)',padding:'3px 8px',
+                borderRadius:6,fontSize:10,fontWeight:600,color:'var(--orange-1000)'}}>DUSK</div>
+            </div>
+            <div style={{background:`url(${IMG.bedroom}) center/cover`,borderRadius:8,aspectRatio:'16/10',position:'relative'}}>
+              <div style={{position:'absolute',inset:0,background:'rgba(26,24,22,.45)',borderRadius:8,
+                display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:600,fontSize:13}}>+8 photos</div>
+            </div>
+          </div>
+        </div>
+        <div style={{padding:'20px 24px 24px'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:16}}>
+            <div>
+              <div className="tnum" style={{fontFamily:'var(--font-display)',fontSize:28,fontWeight:600,color:'var(--gray-1200)'}}>{PROPERTY.price}</div>
+              <div style={{fontSize:16,color:'var(--gray-1200)',marginTop:2}}>
+                <span className="tnum">{PROPERTY.beds} bd · {PROPERTY.baths} ba · {PROPERTY.sqft} sqft</span>
+              </div>
+              <div style={{fontSize:14,color:'var(--gray-700)',marginTop:4}}>{PROPERTY.address}, {PROPERTY.city}</div>
+            </div>
+            <div style={{display:'flex',gap:8}}>
+              <button className="btn btn--sm btn--secondary"><Icon name="heart" size={16}/> Save</button>
+              <button className="btn btn--sm btn--primary">Contact agent</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════════════════
+function Modal({ children, onClose }) {
+  return (
+    <div onClick={onClose} style={{position:'fixed',inset:0,zIndex:1200,background:'rgba(26,24,22,.72)',
+      backdropFilter:'blur(6px)',display:'flex',alignItems:'center',justifyContent:'center',padding:32,
+      animation:'modal-fade 180ms var(--motion-ease-out)'}}>
+      <div onClick={e=>e.stopPropagation()} style={{maxHeight:'92vh',maxWidth:'94vw',overflow:'hidden',borderRadius:20}}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function HeroPlayerModal({ m, onClose }) {
+  const isSocial = m.kind === 'social';
+  return (
+    <div style={{background:'var(--gray-1200)',color:'#fff',width:isSocial?420:980,borderRadius:20,overflow:'hidden',
+      display:'flex',flexDirection:'column'}}>
+      <div style={{padding:'14px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',
+        borderBottom:'1px solid rgba(255,255,255,.08)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <span className={`tag tag--${KIND_META[m.kind].tag}`}><Icon name="sparkles" size={12}/> {KIND_META[m.kind].label}</span>
+          <div style={{fontSize:14,fontWeight:600}}>{m.title}</div>
+        </div>
+        <button onClick={onClose} className="iconbtn" style={{color:'#fff'}}><Icon name="x" size={18}/></button>
+      </div>
+      <div style={{position:'relative',aspectRatio:isSocial?'9/16':'16/9',background:`url(${m.thumb}) center/cover`,maxHeight:'74vh'}}>
+        <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.7))'}}/>
+        <FakePlayer duration={m.duration || '0:42'}/>
+        {isSocial && <div style={{position:'absolute',bottom:80,left:24,right:24,color:'#fff'}}>
+          <div style={{fontSize:22,fontWeight:700}}>123 Main Street</div>
+          <div className="tnum" style={{fontSize:13,opacity:.85,marginTop:4}}>$365K · 3 bd · 2.5 ba</div>
+        </div>}
+      </div>
+      <div style={{padding:'16px 20px',display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:13,color:'rgba(255,255,255,.7)'}}>
+        <span>{m.subtitle}</span>
+        <div style={{display:'flex',gap:8}}>
+          <button className="btn btn--xs btn--ghost-light"><Icon name="download" size={12}/> Download</button>
+          <button className="btn btn--xs btn--ghost-light"><Icon name="share" size={12}/> Share</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FakePlayer({ duration }) {
+  const [playing, setPlaying] = useState(true);
+  const [pct, setPct] = useState(8);
+  useEffect(() => {
+    if (!playing) return;
+    const id = setInterval(() => setPct(p => p >= 100 ? 0 : p + 1.4), 600);
+    return () => clearInterval(id);
+  }, [playing]);
+  return (<>
+    <div onClick={() => setPlaying(p => !p)} style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',
+      width:76,height:76,borderRadius:999,background:'rgba(255,255,255,.92)',display:'flex',alignItems:'center',
+      justifyContent:'center',color:'var(--gray-1200)',cursor:'pointer',boxShadow:'0 8px 24px rgba(0,0,0,.4)'}}>
+      <Icon name={playing?'pause':'play'} size={28}/>
+    </div>
+    <div style={{position:'absolute',left:20,right:20,bottom:20,display:'flex',alignItems:'center',gap:12,color:'#fff'}}>
+      <button onClick={() => setPlaying(p => !p)} style={{background:'transparent',border:0,color:'#fff',cursor:'pointer'}}>
+        <Icon name={playing?'pause':'play'} size={18}/>
+      </button>
+      <div className="tnum" style={{fontSize:12}}>{fmtTime(pct, duration)}</div>
+      <div style={{flex:1,height:4,background:'rgba(255,255,255,.25)',borderRadius:999,cursor:'pointer'}}
+           onClick={e=>{const r=e.currentTarget.getBoundingClientRect();setPct(((e.clientX-r.left)/r.width)*100)}}>
+        <div style={{width:pct+'%',height:'100%',background:'var(--brand)',borderRadius:999}}/>
+      </div>
+      <div className="tnum" style={{fontSize:12}}>{duration}</div>
+      <Icon name="music" size={16}/>
+      <Icon name="expand" size={16}/>
+    </div>
+  </>);
+}
+
+function fmtTime(pct, duration) {
+  const [m, s] = duration.split(':').map(Number);
+  const total = m * 60 + s;
+  const cur = Math.floor((pct / 100) * total);
+  return `${Math.floor(cur/60)}:${String(cur%60).padStart(2,'0')}`;
+}
+
+function CompareModal({ m, onClose }) {
+  return (
+    <div style={{background:'var(--bg-base)',width:1000,maxWidth:'94vw',borderRadius:20,overflow:'hidden'}}>
+      <div style={{padding:'14px 20px',borderBottom:'1px solid var(--border-base)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <span className={`tag tag--${KIND_META[m.kind].tag}`}><Icon name="sparkles" size={12}/> {KIND_META[m.kind].label}</span>
+          <div style={{fontSize:15,fontWeight:600}}>{m.title}</div>
+        </div>
+        <button onClick={onClose} className="iconbtn"><Icon name="x" size={18}/></button>
+      </div>
+      <CompareSlider before={m.before} after={m.after} height={560}
+        beforeLabel={m.kind==='lighting'?'Original (day)':'Original (empty)'}
+        afterLabel={m.kind==='lighting'?'AI-enhanced (dusk)':'AI-staged'}/>
+      <div style={{padding:'14px 20px',display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:13,color:'var(--gray-700)'}}>
+        <span>{m.subtitle}</span>
+        <span style={{display:'inline-flex',alignItems:'center',gap:4}}><Icon name="info" size={14}/> Drag the handle to compare</span>
+      </div>
+    </div>
+  );
+}
+
+function RegenModal({ m, onConfirm, onClose }) {
+  const presets = useMemo(() => {
+    if (m.kind === 'staging') return [
+      {id:'modern-warm',label:'Modern warm',desc:'Neutral tones, oak, linen.',preview:IMG.livingScandi,active:true},
+      {id:'scandi',label:'Scandi minimal',desc:'Light wood, white, sparse.',preview:IMG.livingModern},
+      {id:'classic',label:'Classic',desc:'Heavier wood, traditional accents.',preview:IMG.livingClassic},
+      {id:'staged-empty',label:'Keep empty',desc:'Skip staging — buyers see original.',preview:IMG.livingEmpty},
+    ];
+    if (m.kind === 'lighting') return [
+      {id:'dusk-warm',label:'Warm dusk',desc:'Honey window glow, blue hour sky.',preview:IMG.exteriorDusk,active:true},
+      {id:'golden',label:'Golden hour',desc:'Late-afternoon sun, long shadows.',preview:IMG.exteriorDay},
+      {id:'night',label:'Night',desc:'Dark sky, bright interior windows.',preview:IMG.exteriorNight},
+    ];
+    if (m.kind === 'hero') return [
+      {id:'cinematic',label:'Cinematic (current)',desc:'60s, slow camera, ambient music.',preview:IMG.exteriorDay,active:true},
+      {id:'fast-cuts',label:'Fast cuts',desc:'30s, energetic, upbeat music.',preview:IMG.kitchenBright},
+      {id:'agent-vo',label:'Agent voiceover',desc:'Add narration over walkthrough.',preview:IMG.livingScandi},
+    ];
+    return [
+      {id:'standard',label:'Standard (current)',desc:'15s vertical with caption.',preview:IMG.social1,active:true},
+      {id:'no-caption',label:'No caption',desc:'Clean clip, no overlay text.',preview:IMG.social2},
+    ];
+  }, [m]);
+
+  const [picked, setPicked] = useState(presets.find(p => !p.active)?.id || presets[0].id);
+  const [notes, setNotes] = useState('');
+
+  return (
+    <div style={{background:'var(--bg-base)',width:640,maxWidth:'94vw',borderRadius:20,overflow:'hidden',
+      display:'flex',flexDirection:'column',maxHeight:'92vh'}}>
+      <div style={{padding:'20px 24px 16px',borderBottom:'1px solid var(--border-base)',
+        display:'flex',alignItems:'flex-start',justifyContent:'space-between'}}>
+        <div>
+          <div className="eyebrow">Regenerate</div>
+          <div className="section-heading" style={{fontSize:22,lineHeight:'28px',marginTop:4}}>{m.title}</div>
+          <div style={{fontSize:13,color:'var(--gray-700)',marginTop:4}}>Choose a different direction — we'll create a fresh version in about 30 seconds.</div>
+        </div>
+        <button onClick={onClose} className="iconbtn"><Icon name="x" size={18}/></button>
+      </div>
+      <div style={{padding:'20px 24px',overflow:'auto',flex:1}}>
+        <div style={{fontSize:13,fontWeight:600,color:'var(--gray-1200)',marginBottom:10}}>Style</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10}}>
+          {presets.map(p => (
+            <button key={p.id} onClick={() => setPicked(p.id)} style={{textAlign:'left',padding:10,
+              border:`2px solid ${picked===p.id?'var(--gray-1200)':'var(--border-base)'}`,
+              background:picked===p.id?'var(--gray-50)':'var(--bg-base)',borderRadius:12,cursor:'pointer',
+              fontFamily:'inherit',display:'flex',gap:12,transition:'border-color var(--motion-fast) var(--motion-ease)'}}>
+              <div style={{width:64,height:48,background:`url(${p.preview}) center/cover`,borderRadius:6,flexShrink:0}}/>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:'flex',alignItems:'center',gap:6}}>
+                  <span style={{fontSize:13,fontWeight:600,color:'var(--gray-1200)'}}>{p.label}</span>
+                  {p.active && <span className="tag" style={{background:'var(--gray-200)',color:'var(--gray-1000)',padding:'1px 6px',fontSize:10}}>Current</span>}
+                </div>
+                <div style={{fontSize:12,color:'var(--gray-700)',marginTop:2,lineHeight:1.4}}>{p.desc}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+        <div style={{fontSize:13,fontWeight:600,color:'var(--gray-1200)',marginTop:20,marginBottom:8}}>
+          Anything else? <span style={{fontWeight:400,color:'var(--gray-700)'}}>(optional)</span>
+        </div>
+        <textarea value={notes} onChange={e=>setNotes(e.target.value)}
+          placeholder="e.g. less warm, remove the rug, brighten the windows" rows={3}
+          style={{width:'100%',border:'1px solid var(--border-base)',borderRadius:12,padding:'10px 12px',
+            fontFamily:'inherit',fontSize:14,resize:'vertical',minHeight:70,outline:'none'}}/>
+        <div style={{marginTop:16,padding:12,background:'var(--blue-100)',borderRadius:10,fontSize:12,
+          color:'var(--blue-1000)',display:'flex',gap:8,alignItems:'flex-start'}}>
+          <Icon name="info" size={14}/><span>The current version is kept — you can switch back if you prefer it.</span>
+        </div>
+      </div>
+      <div style={{padding:'16px 24px',borderTop:'1px solid var(--border-base)',display:'flex',justifyContent:'flex-end',gap:8}}>
+        <button onClick={onClose} className="btn btn--secondary btn--sm">Cancel</button>
+        <button onClick={() => onConfirm({preset:picked,notes})} className="btn btn--primary btn--sm">
+          <Icon name="sparkles" size={14}/> Regenerate
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AiDetailsModal({ m, onClose }) {
+  const sections = m.kind === 'hero' ? [
+    ['Inputs','13 photos uploaded · order preserved · 2,448 × 3,264 originals'],
+    ['Color & lighting','Exposure equalised across rooms · sky replaced (overcast → blue) · highlights recovered in the kitchen'],
+    ['Motion','Gentle camera dolly through the front entry · slow pans in living room and primary bedroom · static frames on details'],
+    ['Audio','Background music: "Soft acoustic" preset. No voiceover.'],
+    ['What\'s untouched','Your original photos are not modified. The walkthrough is a new asset alongside them.'],
+  ] : [
+    ['Inputs',`1 original photo · ${m.aspect} aspect · 2,448 × 1,836`],
+    ['Edits', m.kind === 'staging'
+      ? 'Empty room furnished using "Modern warm" preset · furniture placement learned from comparable listings · floor and walls unchanged'
+      : 'Sky replaced with dusk gradient · warm interior light added to windows · subtle vignette · time-of-day metadata: 18:42'],
+    ['What\'s untouched','Architecture, fixtures, and structural elements are unchanged. The room is the same room.'],
+  ];
+  return (
+    <div style={{background:'var(--bg-base)',width:580,maxWidth:'94vw',borderRadius:20,overflow:'hidden'}}>
+      <div style={{padding:'20px 24px',borderBottom:'1px solid var(--border-base)',display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+        <div>
+          <div className="eyebrow">AI transparency</div>
+          <div className="section-heading" style={{fontSize:22,lineHeight:'26px',marginTop:4}}>What did AI change?</div>
+        </div>
+        <button onClick={onClose} className="iconbtn"><Icon name="x" size={18}/></button>
+      </div>
+      <div style={{padding:'20px 24px',maxHeight:'60vh',overflow:'auto'}}>
+        {sections.map(([label, body]) => (
+          <div key={label} style={{display:'grid',gridTemplateColumns:'140px 1fr',gap:16,padding:'12px 0',borderBottom:'1px solid var(--gray-100)'}}>
+            <div style={{fontSize:12,fontWeight:600,color:'var(--gray-700)',textTransform:'uppercase',letterSpacing:'0.06em'}}>{label}</div>
+            <div style={{fontSize:14,color:'var(--gray-1200)',lineHeight:1.55}}>{body}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{padding:'14px 24px',borderTop:'1px solid var(--border-base)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <a href="#" style={{fontSize:13,color:'var(--gray-1000)',fontWeight:500}}>Learn about how we use AI</a>
+        <button onClick={onClose} className="btn btn--sm btn--secondary">Got it</button>
+      </div>
+    </div>
+  );
+}
+
+function ToastStack({ toasts }) {
+  return (
+    <div style={{position:'fixed',bottom:24,left:'50%',transform:'translateX(-50%)',zIndex:9000,
+      display:'flex',flexDirection:'column',gap:8,alignItems:'center',pointerEvents:'none'}}>
+      {toasts.map(t => (
+        <div key={t.id} style={{background:t.kind==='success'?'var(--green-900)':'var(--gray-1200)',color:'#fff',
+          padding:'10px 16px',borderRadius:999,fontSize:13,fontWeight:500,boxShadow:'var(--shadow-dialog)',
+          display:'flex',alignItems:'center',gap:8,animation:'toast-in 240ms var(--motion-ease-out)',
+          pointerEvents:'auto',maxWidth:'min(560px, 92vw)'}}>
+          {t.kind === 'success' && <Icon name="check" size={14} stroke={3}/>}
+          {t.msg}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BUYER PREVIEW SCREEN
+// ═══════════════════════════════════════════════════════════════════
+function BuyerPreviewScreen({ statuses, onBack }) {
+  const approved = (id) => statuses[id] === 'approved';
+  const hasHero = approved('hero-video');
+  const hasDusk = approved('lighting-exterior');
+  const stagedRooms = ['stage-living','stage-dining','stage-bedroom'].filter(approved);
+  const hasSocial = approved('social-1') || approved('social-2');
+  const approvedCount = Object.values(statuses).filter(s => s === 'approved').length;
+
+  return (
+    <div style={{minHeight:'100vh',background:'var(--bg-canvas)'}}>
+      <div style={{position:'sticky',top:0,zIndex:100,background:'var(--gray-1200)',color:'#fff',
+        padding:'12px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',boxShadow:'var(--shadow-raised)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:14}}>
+          <Icon name="eye" size={16}/>
+          <div style={{fontSize:13,fontWeight:600}}>Buyer preview · this is how your listing detail page will appear on realtor.com</div>
+          <span className="tag" style={{background:'rgba(255,255,255,.15)',color:'#fff'}}>{approvedCount} approved</span>
+        </div>
+        <button onClick={onBack} className="btn btn--xs btn--ghost-light"><Icon name="arrowLeft" size={14}/> Back to review</button>
+      </div>
+
+      <div style={{background:'#fff',borderBottom:'1px solid var(--border-base)',padding:'12px 24px',
+        display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <div style={{display:'flex',alignItems:'center',gap:30}}>
+          <img src="assets/realtor-pro-lockup.png" style={{height:22}} alt=""/>
+          <div style={{display:'flex',gap:24,fontSize:14,fontWeight:500,color:'var(--gray-1200)'}}>
+            {['Buy','Rent','Sell','Pre-approval','Just sold'].map(l => <a key={l} href="#" style={{textDecoration:'none',color:'inherit'}}>{l}</a>)}
+          </div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <button className="btn btn--xs btn--secondary">Sign in</button>
+          <button className="btn btn--xs btn--primary">Join</button>
+        </div>
+      </div>
+
+      <div style={{maxWidth:1180,margin:'0 auto',padding:'20px 24px 48px'}}>
+        <div style={{fontSize:12,color:'var(--gray-700)',marginBottom:14}}>
+          <a href="#" style={{color:'inherit'}}>Texas</a> · <a href="#" style={{color:'inherit'}}>Austin</a> · <a href="#" style={{color:'inherit'}}>78701</a> · 123 Main St
+        </div>
+
+        <BuyerHero hasHero={hasHero} hasDusk={hasDusk} stagedRooms={stagedRooms}/>
+
+        <div style={{display:'grid',gridTemplateColumns:'1fr 360px',gap:32,marginTop:28}}>
+          <div>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:16}}>
+              <div>
+                <div className="tnum" style={{fontFamily:'var(--font-display)',fontSize:36,fontWeight:600,color:'var(--gray-1200)',lineHeight:1}}>{PROPERTY.price}</div>
+                <div className="tnum" style={{fontSize:18,color:'var(--gray-1200)',marginTop:6}}>{PROPERTY.beds} bed · {PROPERTY.baths} bath · {PROPERTY.sqft} sqft · 0.18 ac</div>
+                <div style={{fontSize:15,color:'var(--gray-700)',marginTop:4}}>{PROPERTY.address}, {PROPERTY.city}</div>
+              </div>
+              <div style={{display:'flex',gap:8}}>
+                <button className="btn btn--sm btn--secondary"><Icon name="heart" size={16}/> Save</button>
+                <button className="btn btn--sm btn--secondary"><Icon name="share" size={16}/> Share</button>
+              </div>
+            </div>
+
+            {approvedCount > 0 && (
+              <div style={{marginTop:24,background:'linear-gradient(95deg,#fff8f3 0%,#fff 100%)',
+                border:'1px solid var(--orange-300)',borderRadius:16,padding:'14px 20px',display:'flex',alignItems:'center',gap:14}}>
+                <div style={{width:36,height:36,borderRadius:999,background:'var(--brand)',color:'#fff',
+                  display:'flex',alignItems:'center',justifyContent:'center'}}><Icon name="sparkles" size={18}/></div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:600,color:'var(--gray-1200)'}}>Spotlight listing</div>
+                  <div style={{fontSize:13,color:'var(--gray-700)'}}>Enhanced with cinematic video, virtual staging, and dusk imagery.</div>
+                </div>
+                <span className="tag tag--neutral">Featured</span>
+              </div>
+            )}
+
+            <section style={{marginTop:32}}>
+              <h2 className="section-heading" style={{fontSize:22,lineHeight:'28px',margin:'0 0 12px'}}>About this home</h2>
+              <p style={{fontSize:15,color:'var(--gray-1200)',lineHeight:1.6,margin:0}}>
+                Bright, move-in ready 3-bedroom in the heart of downtown Austin. Open-plan living, refinished oak floors, and a sun-filled kitchen with a breakfast nook. Two-car garage, private backyard with mature trees. Walkable to coffee, restaurants, and Lady Bird Lake.
+              </p>
+              <button style={{marginTop:10,background:'transparent',border:0,padding:0,color:'var(--brand)',fontSize:14,fontWeight:600,cursor:'pointer'}}>Read more</button>
+            </section>
+
+            <section style={{marginTop:28,display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
+              {[['Type','Single family'],['Year built','1972'],['Lot size','0.18 ac'],['HOA','$0/mo']].map(([k,v]) => (
+                <div key={k} style={{padding:'14px 16px',border:'1px solid var(--border-base)',borderRadius:12,background:'#fff'}}>
+                  <div style={{fontSize:12,color:'var(--gray-700)',fontWeight:500}}>{k}</div>
+                  <div style={{fontSize:16,fontWeight:600,color:'var(--gray-1200)',marginTop:4}}>{v}</div>
+                </div>
+              ))}
+            </section>
+
+            {hasSocial && (
+              <section style={{marginTop:32}}>
+                <h2 className="section-heading" style={{fontSize:22,lineHeight:'28px',margin:'0 0 12px'}}>Watch on social</h2>
+                <div style={{display:'flex',gap:12,overflowX:'auto'}}>
+                  {statuses['social-1'] === 'approved' && <SocialChip thumb={IMG.social1} label="Reels / TikTok"/>}
+                  {statuses['social-2'] === 'approved' && <SocialChip thumb={IMG.social2} label="Story / Shorts"/>}
+                </div>
+              </section>
+            )}
+          </div>
+
+          <aside>
+            <div style={{position:'sticky',top:80,background:'#fff',border:'1px solid var(--border-base)',
+              borderRadius:16,padding:20,boxShadow:'var(--shadow-raised)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                <img src={IMG.agent} style={{width:48,height:48,borderRadius:999,objectFit:'cover'}} alt=""/>
+                <div>
+                  <div style={{fontSize:14,fontWeight:600}}>{PROPERTY.agent.name}</div>
+                  <div style={{fontSize:12,color:'var(--gray-700)'}}>Listing agent · Austin, TX</div>
+                </div>
+              </div>
+              <button className="btn btn--primary" style={{width:'100%',marginTop:16}}>Contact agent</button>
+              <button className="btn btn--secondary" style={{width:'100%',marginTop:8}}>Schedule a tour</button>
+              <div style={{marginTop:16,paddingTop:16,borderTop:'1px solid var(--border-base)',fontSize:12,color:'var(--gray-700)',lineHeight:1.5}}>
+                Listed by Kelly Park · Goodall Realty<br/>MLS <span className="tnum">{PROPERTY.mls}</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BuyerHero({ hasHero, hasDusk, stagedRooms }) {
+  const primary = hasDusk ? IMG.exteriorDusk : IMG.exteriorDay;
+  const tiles = [
+    stagedRooms.includes('stage-living') ? IMG.livingScandi : IMG.livingEmpty,
+    IMG.kitchen,
+    stagedRooms.includes('stage-bedroom') ? IMG.bedroom : IMG.bedroom2,
+    stagedRooms.includes('stage-dining') ? IMG.dining : IMG.bathroom,
+  ];
+  return (
+    <div style={{display:'grid',gridTemplateColumns:'1.6fr 1fr 1fr',gap:8,height:480}}>
+      <div style={{background:`url(${primary}) center/cover`,borderRadius:12,position:'relative'}}>
+        {hasHero && <button style={{position:'absolute',bottom:16,left:16,background:'rgba(26,24,22,.78)',
+          backdropFilter:'blur(8px)',color:'#fff',borderRadius:999,padding:'10px 18px',border:0,cursor:'pointer',
+          fontSize:14,fontWeight:600,display:'inline-flex',alignItems:'center',gap:8}}>
+          <Icon name="play" size={16}/> Watch cinematic tour · 0:42
+        </button>}
+        {hasDusk && <div style={{position:'absolute',top:16,right:16,background:'rgba(255,255,255,.92)',
+          backdropFilter:'blur(6px)',padding:'6px 12px',borderRadius:999,fontSize:11,fontWeight:600,
+          color:'var(--orange-1000)',textTransform:'uppercase',letterSpacing:'0.06em',
+          display:'inline-flex',alignItems:'center',gap:6}}><Icon name="moon" size={12}/> AI dusk</div>}
+      </div>
+      <div style={{display:'grid',gridTemplateRows:'1fr 1fr',gap:8}}>
+        <BuyerTile bg={tiles[0]} staged={stagedRooms.includes('stage-living')}/>
+        <BuyerTile bg={tiles[1]}/>
+      </div>
+      <div style={{display:'grid',gridTemplateRows:'1fr 1fr',gap:8}}>
+        <BuyerTile bg={tiles[2]} staged={stagedRooms.includes('stage-bedroom')}/>
+        <div style={{background:`url(${tiles[3]}) center/cover`,borderRadius:12,position:'relative'}}>
+          <div style={{position:'absolute',inset:0,background:'rgba(26,24,22,.55)',borderRadius:12,
+            display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:600,fontSize:16,cursor:'pointer'}}>+12 photos</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BuyerTile({ bg, staged }) {
+  return (
+    <div style={{background:`url(${bg}) center/cover`,borderRadius:12,position:'relative'}}>
+      {staged && <div style={{position:'absolute',top:8,left:8,background:'rgba(255,255,255,.92)',
+        backdropFilter:'blur(6px)',padding:'3px 8px',borderRadius:6,fontSize:10,fontWeight:600,
+        color:'var(--purple-1000)',textTransform:'uppercase',letterSpacing:'0.06em'}}>Virtually staged</div>}
+    </div>
+  );
+}
+
+function SocialChip({ thumb, label }) {
+  return (
+    <div style={{width:200,aspectRatio:'9/16',background:`url(${thumb}) center/cover`,borderRadius:12,
+      position:'relative',cursor:'pointer',flexShrink:0}}>
+      <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,transparent 50%,rgba(0,0,0,.6))',borderRadius:12}}/>
+      <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:44,height:44,
+        borderRadius:999,background:'rgba(255,255,255,.92)',display:'flex',alignItems:'center',justifyContent:'center',
+        color:'var(--gray-1200)'}}><Icon name="play" size={18}/></div>
+      <div style={{position:'absolute',bottom:12,left:14,color:'#fff',fontWeight:600,fontSize:13}}>{label}</div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PUBLISH CONFIRM & SUCCESS
+// ═══════════════════════════════════════════════════════════════════
+function PublishConfirmScreen({ statuses, onCancel, onConfirm }) {
+  const approved = Object.values(statuses).filter(s => s === 'approved').length;
+  const breakdown = ['hero','staging','lighting','social'].map(k => ({
+    kind:k, label:KIND_META[k].label,
+    count:MEDIA.filter(m => m.kind===k && statuses[m.id]==='approved').length,
+  }));
+  return (
+    <div style={{minHeight:'100vh',background:'var(--bg-canvas)',display:'flex',alignItems:'center',justifyContent:'center',padding:32}}>
+      <div style={{background:'#fff',borderRadius:20,boxShadow:'var(--shadow-dialog)',border:'1px solid var(--border-base)',
+        width:560,maxWidth:'100%',overflow:'hidden'}}>
+        <div style={{padding:'28px 28px 20px'}}>
+          <div className="eyebrow">Confirm</div>
+          <div className="section-heading" style={{fontSize:26,lineHeight:'30px',marginTop:4}}>
+            Publish {approved} immersive {approved===1?'asset':'assets'} to your listing?
+          </div>
+          <p style={{fontSize:14,color:'var(--gray-700)',marginTop:8,lineHeight:1.5}}>
+            These will appear on your Spotlight listing detail page within ~15 minutes. You can swap, replace, or remove them at any time.
+          </p>
+        </div>
+        <div style={{padding:'0 28px 20px'}}>
+          <div style={{background:'var(--gray-50)',border:'1px solid var(--border-base)',borderRadius:12,padding:'14px 18px'}}>
+            {breakdown.filter(b=>b.count>0).map(b => (
+              <div key={b.kind} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 0'}}>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <Icon name={b.kind==='hero'?'video':b.kind==='staging'?'layers':b.kind==='lighting'?'moon':'phone'} size={16}/>
+                  <span style={{fontSize:14,color:'var(--gray-1200)'}}>{b.label}</span>
+                </div>
+                <span className="tnum" style={{fontSize:14,fontWeight:600}}>{b.count}</span>
+              </div>
+            ))}
+          </div>
+          <label style={{display:'flex',gap:10,padding:'14px 4px 0',fontSize:13,color:'var(--gray-1200)',cursor:'pointer'}}>
+            <input type="checkbox" defaultChecked style={{marginTop:3}}/>
+            <span>Notify me when buyers start engaging with these (saves, tour requests, replays).</span>
+          </label>
+        </div>
+        <div style={{padding:'16px 24px',background:'var(--gray-50)',borderTop:'1px solid var(--border-base)',
+          display:'flex',justifyContent:'flex-end',gap:8}}>
+          <button onClick={onCancel} className="btn btn--sm btn--secondary">Cancel</button>
+          <button onClick={onConfirm} className="btn btn--sm btn--primary"><Icon name="check" size={14} stroke={3}/> Publish now</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PublishSuccessScreen({ statuses, onView, onRestart }) {
+  const approved = Object.values(statuses).filter(s => s === 'approved').length;
+  return (
+    <div style={{minHeight:'100vh',background:'var(--bg-canvas)',display:'flex',alignItems:'center',justifyContent:'center',padding:32}}>
+      <div style={{width:640,maxWidth:'100%'}}>
+        <div style={{background:'#fff',borderRadius:20,boxShadow:'var(--shadow-dialog)',border:'1px solid var(--border-base)',
+          padding:'36px 36px 28px',textAlign:'center'}}>
+          <div style={{width:72,height:72,borderRadius:999,background:'var(--green-100)',color:'var(--green-900)',
+            display:'inline-flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}>
+            <Icon name="check" size={32} stroke={3}/>
+          </div>
+          <h2 className="section-heading" style={{fontSize:28,lineHeight:'32px',margin:0}}>
+            Published — your listing is live with immersive media
+          </h2>
+          <p style={{fontSize:15,color:'var(--gray-700)',margin:'8px auto 0',maxWidth:460}}>
+            {approved} asset{approved===1?'':'s'} are now showing on realtor.com. Most listings see new media take effect within 15 minutes.
+          </p>
+          <div style={{background:'var(--gray-50)',borderRadius:14,padding:20,marginTop:24,textAlign:'left',
+            display:'flex',alignItems:'center',gap:14}}>
+            <img src={IMG.exteriorDay} style={{width:72,height:56,borderRadius:8,objectFit:'cover'}} alt=""/>
+            <div style={{flex:1}}>
+              <div style={{fontSize:14,fontWeight:600}}>{PROPERTY.address}</div>
+              <div className="tnum" style={{fontSize:12,color:'var(--gray-700)'}}>{PROPERTY.price} · MLS {PROPERTY.mls}</div>
+            </div>
+            <span className="tag" style={{background:'var(--green-100)',color:'var(--green-900)'}}>
+              <Icon name="sparkles" size={12}/> Spotlight
+            </span>
+          </div>
+          <div style={{display:'flex',gap:10,justifyContent:'center',marginTop:24}}>
+            <button className="btn btn--secondary" onClick={onRestart}>Back to listings</button>
+            <button className="btn btn--primary" onClick={onView}><Icon name="eye" size={16}/> View on realtor.com</button>
+          </div>
+        </div>
+        <div style={{marginTop:16,padding:'14px 20px',background:'#fff',border:'1px solid var(--border-base)',
+          borderRadius:14,fontSize:13,color:'var(--gray-700)',display:'flex',alignItems:'center',gap:10}}>
+          <Icon name="chart" size={16}/>
+          <span>Listings with immersive media get <strong style={{color:'var(--gray-1200)'}}>2.4x more saves</strong> and <strong style={{color:'var(--gray-1200)'}}>1.8x more tour requests</strong> on average.</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Mount ──────────────────────────────────────────────────────────
+ReactDOM.createRoot(document.getElementById('root')).render(<Prototype/>);
+</script>
+</body>
+</html>
