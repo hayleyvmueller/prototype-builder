@@ -293,7 +293,7 @@ function FormPage({ data, set, onGenerate, onCopyLink, isCopied }) {
   );
 }
 
-const PAGES_BASE = "https://rdcspl.github.io/prototype-builder/spotlight-preview";
+const PAGES_BASE = "https://hayleyvmueller.github.io/prototype-builder/spotlight-preview";
 
 // ============================================================
 // App
