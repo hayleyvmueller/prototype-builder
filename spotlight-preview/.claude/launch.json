@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "spotlight-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-p", "5679", "."],
+      "port": 5679
+    }
+  ]
+}
