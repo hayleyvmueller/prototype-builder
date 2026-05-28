@@ -326,13 +326,6 @@ function App() {
           <span className="for-pros">for Professionals</span>
         </div>
         <div className="topbar-spacer" />
-        <div className="topbar-user">
-          <div className="name">
-            <span className="label">Welcome</span>
-            <span>Samantha</span>
-          </div>
-          <div className="avatar">SR</div>
-        </div>
       </div>
 
       <div className="body">
