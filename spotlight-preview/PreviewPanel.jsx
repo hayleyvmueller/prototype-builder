@@ -148,12 +148,15 @@ function PreviewPanel({ data }) {
 
   const thumbLabels = ["Kitchen", "Bedrooms", "Bathrooms", "FlyAround"];
   const FLYAROUND_URL = "assets/flyaround.png";
-  // Fill all 4 thumbnail slots — cycle through available photos if not enough
-  // FlyAround (index 3) always uses the hardcoded aerial image
+  // Fill first 3 slots from uploaded photos (cycling if not enough), FlyAround always hardcoded
   const thumbPhotos = [1, 2, 3].map(i => {
     if (data.photos.length === 0) return null;
     return data.photos[i] || data.photos[i % data.photos.length];
   }).concat([{ url: FLYAROUND_URL, label: "FlyAround" }]);
+
+  // Renovate split viewer: hardcoded kitchen before/after
+  const KITCHEN_BEFORE = "assets/Preview Photos/Kitchen.png";
+  const KITCHEN_AFTER  = "assets/Preview Photos/Modern:Mid Century/Modern kichen.png";
 
   const aiPhoto1 = data.photos[0] ? data.photos[0].url : null;
   const aiPhoto2 = data.photos[1] ? data.photos[1].url : (data.photos[0] ? data.photos[0].url : null);
@@ -360,7 +363,7 @@ function PreviewPanel({ data }) {
               <div className="sy-subsection">
                 <h4 className="sy-subtitle">Renovate this space</h4>
                 <div className="sy-card">
-                  <SplitViewer beforeUrl={aiPhoto1} afterUrl={aiPhoto2} />
+                  <SplitViewer beforeUrl={KITCHEN_BEFORE} afterUrl={KITCHEN_AFTER} />
                   <div className="sy-controls">
                     <AISelect label="Select an option" options={["Kitchen", "Living room", "Bathroom", "Bedroom"]} defaultVal="Kitchen" />
                     <AISelect label="Select an option" options={["Mid-century modern", "Modern minimal", "Coastal warm"]} defaultVal="Mid-century modern" />
