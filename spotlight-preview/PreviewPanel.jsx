@@ -369,7 +369,7 @@ function PreviewPanel({ data }) {
               <div className="sy-subsection">
                 <h4 className="sy-subtitle">Renovate this space</h4>
                 <div className="sy-card">
-                  <SplitViewer beforeUrl={KITCHEN_BEFORE} afterUrl={RENOVATE_AFTER_MAP[renovateStyle]} />
+                  <SplitViewer beforeUrl={RENOVATE_AFTER_MAP[renovateStyle]} afterUrl={KITCHEN_BEFORE} />
                   <div className="sy-controls">
                     <AISelect label="Select an option" options={["Kitchen", "Living room", "Bathroom", "Bedroom"]} defaultVal="Kitchen" />
                     <div className="ai-select-group">
