@@ -155,8 +155,8 @@ function PreviewPanel({ data }) {
   }).concat([{ url: FLYAROUND_URL, label: "FlyAround" }]);
 
   // Renovate split viewer: hardcoded kitchen before/after
-  const KITCHEN_BEFORE = "assets/Preview Photos/Kitchen.png";
-  const KITCHEN_AFTER  = "assets/Preview Photos/Modern-Mid-Century/Modern kichen.png";
+  const KITCHEN_BEFORE = "assets/preview-photos/kitchen.png";
+  const KITCHEN_AFTER  = "assets/preview-photos/Modern-Mid-Century/modern-kitchen.png";
 
   const aiPhoto1 = data.photos[0] ? data.photos[0].url : null;
   const aiPhoto2 = data.photos[1] ? data.photos[1].url : (data.photos[0] ? data.photos[0].url : null);
