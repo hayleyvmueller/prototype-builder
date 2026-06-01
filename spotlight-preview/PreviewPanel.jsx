@@ -102,6 +102,13 @@ function PreviewPanel({ data }) {
   const [isPlaying, setIsPlaying] = useStateP(true);
   const [showFullDesc, setShowFullDesc] = useStateP(false);
   const [detailsExpanded, setDetailsExpanded] = useStateP(true);
+  const [renovateStyle, setRenovateStyle] = useStateP("Modern minimal");
+
+  const RENOVATE_AFTER_MAP = {
+    "Modern minimal":    "assets/preview-photos/Modern-Mid-Century/modern-kitchen.png",
+    "Mid-century modern":"assets/preview-photos/Modern-Mid-Century/mid-century-kitchen-2.png",
+    "Coastal warm":      "assets/preview-photos/Modern-Mid-Century/modern-kitchen.png",
+  };
 
   useEffectP(() => {
     if (activePhoto >= data.photos.length) setActivePhoto(0);
@@ -363,10 +370,17 @@ function PreviewPanel({ data }) {
               <div className="sy-subsection">
                 <h4 className="sy-subtitle">Renovate this space</h4>
                 <div className="sy-card">
-                  <SplitViewer beforeUrl={KITCHEN_BEFORE} afterUrl={KITCHEN_AFTER} />
+                  <SplitViewer beforeUrl={KITCHEN_BEFORE} afterUrl={RENOVATE_AFTER_MAP[renovateStyle]} />
                   <div className="sy-controls">
                     <AISelect label="Select an option" options={["Kitchen", "Living room", "Bathroom", "Bedroom"]} defaultVal="Kitchen" />
-                    <AISelect label="Select an option" options={["Modern minimal", "Mid-century modern", "Coastal warm"]} defaultVal="Modern minimal" />
+                    <div className="ai-select-group">
+                      <div className="ai-select-label">Select an option <span className="ai-info">ⓘ</span></div>
+                      <select className="select ai-select-input" value={renovateStyle} onChange={e => setRenovateStyle(e.target.value)}>
+                        <option>Modern minimal</option>
+                        <option>Mid-century modern</option>
+                        <option>Coastal warm</option>
+                      </select>
+                    </div>
                     <AISelect label="Select an option" options={["$10,000", "$25,000", "$50,000", "$100,000"]} defaultVal="$50,000" />
                     <button className="btn-ai-update">Update</button>
                   </div>
