@@ -1192,7 +1192,7 @@ input, select, textarea { font-family: inherit; }
 .agent-attr-bar {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 24px;
-  background: #B81D22;
+  background: #75000E;
   color: white;
   font-size: 13px;
 }
