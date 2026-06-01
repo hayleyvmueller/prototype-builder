@@ -147,7 +147,12 @@ function PreviewPanel({ data }) {
   const brokerageColor = BROKERAGE_COLORS[brkHash % BROKERAGE_COLORS.length];
 
   const thumbLabels = ["Kitchen", "Bedrooms", "Bathrooms", "FlyAround"];
-  const thumbPhotos = [1, 2, 3, 4].map(i => data.photos[i] || null);
+  // Fill all 4 thumbnail slots — cycle through available photos if not enough
+  const thumbPhotos = [1, 2, 3, 4].map(i => {
+    if (data.photos.length === 0) return null;
+    // Use photo labels if available, otherwise cycle
+    return data.photos[i] || data.photos[i % data.photos.length];
+  });
 
   const aiPhoto1 = data.photos[0] ? data.photos[0].url : null;
   const aiPhoto2 = data.photos[1] ? data.photos[1].url : (data.photos[0] ? data.photos[0].url : null);
