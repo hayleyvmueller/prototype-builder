@@ -1098,7 +1098,7 @@ input, select, textarea { font-family: inherit; }
 /* ====== Hero grid ====== */
 .hero-grid {
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: 1fr 200px;
   height: 420px;
   gap: 2px;
   background: var(--gray-900);
