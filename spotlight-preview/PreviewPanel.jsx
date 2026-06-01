@@ -175,17 +175,13 @@ function PreviewPanel({ data }) {
 
       {/* ── Header ── */}
       <div className="preview-header-new">
-        <div className="ph-search">
-          <Ic.Search s={15} />
-          <span>{data.street || "Search an address"}</span>
-        </div>
+        <div />
         <div className="ph-center">
           <img src="assets/realtor-logo.svg" alt="realtor.com" />
         </div>
         <div className="ph-right">
           <button className="ph-icon-btn" title="Saved"><Ic.Heart s={18} /></button>
           <button className="ph-icon-btn" title="Notifications"><Ic.Bell s={18} /></button>
-          <button className="btn-signin">Sign in</button>
         </div>
       </div>
 
