@@ -147,12 +147,13 @@ function PreviewPanel({ data }) {
   const brokerageColor = BROKERAGE_COLORS[brkHash % BROKERAGE_COLORS.length];
 
   const thumbLabels = ["Kitchen", "Bedrooms", "Bathrooms", "FlyAround"];
+  const FLYAROUND_URL = "assets/flyaround.png";
   // Fill all 4 thumbnail slots — cycle through available photos if not enough
-  const thumbPhotos = [1, 2, 3, 4].map(i => {
+  // FlyAround (index 3) always uses the hardcoded aerial image
+  const thumbPhotos = [1, 2, 3].map(i => {
     if (data.photos.length === 0) return null;
-    // Use photo labels if available, otherwise cycle
     return data.photos[i] || data.photos[i % data.photos.length];
-  });
+  }).concat([{ url: FLYAROUND_URL, label: "FlyAround" }]);
 
   const aiPhoto1 = data.photos[0] ? data.photos[0].url : null;
   const aiPhoto2 = data.photos[1] ? data.photos[1].url : (data.photos[0] ? data.photos[0].url : null);
