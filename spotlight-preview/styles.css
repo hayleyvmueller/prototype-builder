@@ -1098,8 +1098,8 @@ input, select, textarea { font-family: inherit; }
 /* ====== Hero grid ====== */
 .hero-grid {
   display: grid;
-  grid-template-columns: 1fr 294px;
-  height: 380px;
+  grid-template-columns: 1fr 1fr;
+  height: 420px;
   gap: 2px;
   background: var(--gray-900);
   overflow: hidden;
@@ -1109,16 +1109,9 @@ input, select, textarea { font-family: inherit; }
   overflow: hidden;
   background: var(--gray-900);
 }
-.hm-blur-left, .hm-blur-right {
-  position: absolute; top: 0; bottom: 0; width: 100px;
-  background-size: cover; background-position: center;
-  filter: blur(14px); transform: scale(1.1); opacity: 0.9;
-}
-.hm-blur-left { left: 0; }
-.hm-blur-right { right: 0; }
+.hm-blur-left, .hm-blur-right { display: none; }
 .hm-image {
-  position: absolute;
-  left: 100px; right: 100px; top: 0; bottom: 0;
+  position: absolute; inset: 0;
   background-size: cover; background-position: center;
 }
 .hm-topleft {
