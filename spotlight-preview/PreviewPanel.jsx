@@ -105,9 +105,9 @@ function PreviewPanel({ data }) {
   const [renovateStyle, setRenovateStyle] = useStateP("Modern minimal");
 
   const RENOVATE_AFTER_MAP = {
-    "Modern minimal":    "assets/preview-photos/Modern-Mid-Century/modern-kitchen.png",
-    "Mid-century modern":"assets/preview-photos/Modern-Mid-Century/mid-century-kitchen-2.png",
-    "Coastal warm":      "assets/preview-photos/Modern-Mid-Century/modern-kitchen.png",
+    "Modern minimal":     "assets/preview-photos/Modern-Mid-Century/modern-kitchen.png",
+    "Mid-century modern": "assets/preview-photos/Modern-Mid-Century/mid-century-kitchen-2.png",
+    "Coastal warm":       "assets/preview-photos/Modern-Mid-Century/modern-kitchen.png",
   };
 
   useEffectP(() => {
@@ -162,8 +162,7 @@ function PreviewPanel({ data }) {
   }).concat([{ url: FLYAROUND_URL, label: "FlyAround" }]);
 
   // Renovate split viewer: hardcoded kitchen before/after
-  const KITCHEN_BEFORE = "assets/preview-photos/Modern-Mid-Century/mid-century-kitchen-2.png";
-  const KITCHEN_AFTER  = "assets/preview-photos/kitchen.png";
+  const KITCHEN_BEFORE = "assets/preview-photos/kitchen.png";
 
   const aiPhoto1 = data.photos[0] ? data.photos[0].url : null;
   const aiPhoto2 = data.photos[1] ? data.photos[1].url : (data.photos[0] ? data.photos[0].url : null);
