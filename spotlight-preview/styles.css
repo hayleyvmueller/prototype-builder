@@ -1192,20 +1192,32 @@ input, select, textarea { font-family: inherit; }
 .agent-attr-bar {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 24px;
-  background: #1A1816;
+  background: #D92228;
   color: white;
   font-size: 13px;
 }
-.aa-avatar {
-  width: 38px; height: 38px; border-radius: 999px;
-  background: white; color: var(--text-base);
+.aa-avatar-wrap {
+  position: relative;
+  width: 42px; height: 42px; flex-shrink: 0;
+}
+.aa-headshot {
+  width: 42px; height: 42px; border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.5);
+  display: block;
+}
+.aa-brokerage-badge {
+  position: absolute; bottom: -3px; right: -3px;
+  width: 20px; height: 20px; border-radius: 999px;
+  background: #1d4ed8; color: white;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 13px; flex-shrink: 0;
-  border: 2px solid rgba(255,255,255,0.25);
+  font-size: 7px; font-weight: 800; letter-spacing: -0.3px;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 .aa-text { font-size: 13px; line-height: 18px; }
 .aa-text strong { font-weight: 600; }
-.aa-sep { margin: 0 4px; opacity: 0.4; }
+.aa-sep { margin: 0 4px; opacity: 0.5; }
 
 /* ====== About section ====== */
 .about-section {

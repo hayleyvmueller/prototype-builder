@@ -127,6 +127,24 @@ function PreviewPanel({ data }) {
   const propertyTypeShort = ({ "single-family": "Single family", townhouse: "Townhouse", condo: "Condo", "multi-family": "Multi-family" })[data.propertyType] || "Single family";
 
   const agentInitials = (data.agentName || "AN").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  const brokerageInitials = (data.brokerage || "B").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+  // Pick a consistent headshot based on agent name
+  const HEADSHOTS = [
+    "https://randomuser.me/api/portraits/women/44.jpg",
+    "https://randomuser.me/api/portraits/men/32.jpg",
+    "https://randomuser.me/api/portraits/women/68.jpg",
+    "https://randomuser.me/api/portraits/men/75.jpg",
+    "https://randomuser.me/api/portraits/women/26.jpg",
+    "https://randomuser.me/api/portraits/men/46.jpg",
+  ];
+  const nameHash = (data.agentName || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const headshot = HEADSHOTS[nameHash % HEADSHOTS.length];
+
+  // Brokerage brand color (hash-based)
+  const BROKERAGE_COLORS = ["#D92228", "#b91c1c", "#1d4ed8", "#0f766e", "#7c3aed", "#c2410c"];
+  const brkHash = (data.brokerage || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const brokerageColor = BROKERAGE_COLORS[brkHash % BROKERAGE_COLORS.length];
 
   const thumbLabels = ["Kitchen", "Bedrooms", "Bathrooms", "FlyAround"];
   const thumbPhotos = [1, 2, 3, 4].map(i => data.photos[i] || null);
@@ -240,7 +258,12 @@ function PreviewPanel({ data }) {
 
       {/* ── Agent bar ── */}
       <div className="agent-attr-bar">
-        <div className="aa-avatar">{agentInitials}</div>
+        <div className="aa-avatar-wrap">
+          <img className="aa-headshot" src={headshot} alt={data.agentName || "Agent"} />
+          <div className="aa-brokerage-badge" style={{ background: brokerageColor }}>
+            {brokerageInitials}
+          </div>
+        </div>
         <div className="aa-text">
           Listed by <strong>{data.agentName || "Agent Name"}</strong>
           <span className="aa-sep"> | </span>
