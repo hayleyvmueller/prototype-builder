@@ -45,9 +45,13 @@ function PlaceholderCard({ p }) {
             <span className="dot">·</span>
             <span>{p.lot}</span>
           </div>
-          <div className="sr-card-addr">{p.addr}</div>
-          <div className="sr-card-city">{p.city}</div>
-          <button className="sr-email-btn">Email agent</button>
+          <div className="sr-card-addr-row">
+            <div>
+              <div className="sr-card-addr">{p.addr}</div>
+              <div className="sr-card-city">{p.city}</div>
+            </div>
+            <button className="sr-email-btn">Email agent</button>
+          </div>
         </div>
       </div>
     </div>
@@ -95,9 +99,13 @@ function SpotlightCard({ data }) {
             <span>{sqft} sqft</span>
             {lot && <React.Fragment><span className="dot">·</span><span>{lot}</span></React.Fragment>}
           </div>
-          <div className="sr-card-addr">{addr}</div>
-          <div className="sr-card-city">{city}</div>
-          <button className="sr-email-btn" onClick={e => { e.stopPropagation(); openPreview(); }}>View listing</button>
+          <div className="sr-card-addr-row">
+            <div>
+              <div className="sr-card-addr">{addr}</div>
+              <div className="sr-card-city">{city}</div>
+            </div>
+            <button className="sr-email-btn" onClick={e => { e.stopPropagation(); openPreview(); }}>View listing</button>
+          </div>
         </div>
       </div>
     </div>
