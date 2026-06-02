@@ -9,7 +9,7 @@ const PLACEHOLDERS = [
   { price: 879000,  beds: 4, baths: 3,   sqft: 2840, lot: "7,100 sqft lot", addr: "5504 Maverick Hills Dr",  city: "Austin, TX 78752", label: "House for sale",      badge: null,   img: "https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=600&q=80", brokerage: "Hill Country Home Co." },
   { price: 1475000, beds: 4, baths: 4,   sqft: 3890, lot: "2,614 sqft lot", addr: "312 Barton Cove Unit 7",  city: "Austin, TX 78702", label: "House for sale",      badge: "New",  img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80", brokerage: "Westlake Premier Realty" },
   { price: 498000,  beds: 3, baths: 2,   sqft: 1820, lot: "6,098 sqft lot", addr: "910 Mockingbird Hollow",  city: "Austin, TX 78751", label: "House for sale",      badge: null,   img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",  brokerage: "Texan Nest Realty" },
-  { price: 2100000, beds: 5, baths: 5,   sqft: 4820, lot: "9,450 sqft lot", addr: "7701 Lakeview Summit",    city: "Austin, TX 78746", label: "House for sale",      badge: null,   img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80", brokerage: "Presidio Luxury Homes" },
+  { price: 2100000, beds: 5, baths: 5,   sqft: 4820, lot: "9,450 sqft lot", addr: "7701 Lakeview Summit",    city: "Austin, TX 78746", label: "House for sale",      badge: null,   img: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80", brokerage: "Presidio Luxury Homes" },
 ];
 
 function fmtPrice(n) {
