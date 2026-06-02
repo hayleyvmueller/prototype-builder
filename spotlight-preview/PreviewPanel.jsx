@@ -397,9 +397,9 @@ function PreviewPanel({ data }) {
               <div className="sy-subsection">
                 <h4 className="sy-subtitle">Stage this space</h4>
                 <div className="sy-card">
-                  <SplitViewer beforeUrl="assets/preview-photos/Modern-Mid-Century/modern-bathroom.png" afterUrl="assets/preview-photos/bathroom.png" />
+                  <SplitViewer beforeUrl="assets/preview-photos/bedroom.png" afterUrl="assets/preview-photos/Modern-Mid-Century/Coastal bedroom.png" />
                   <div className="sy-controls">
-                    <AISelect label="Select an option" options={["Bathroom", "Foyer", "Living room", "Dining room", "Bedroom"]} defaultVal="Bathroom" />
+                    <AISelect label="Select an option" options={["Bedroom", "Bathroom", "Foyer", "Living room", "Dining room"]} defaultVal="Bedroom" />
                     <AISelect label="Select an option" options={["Modern minimal", "Mid-century modern", "Coastal warm"]} defaultVal="Modern minimal" />
                     <button className="btn-ai-update">Update</button>
                   </div>
