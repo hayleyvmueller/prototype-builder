@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Austin, TX Homes for Sale · realtor.com</title>
+<link rel="icon" href="assets/realtor-logo.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  html, body, #root { height: auto; min-height: 100%; }
+  body { overflow: auto; background: white; }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="icons.jsx"></script>
+  <script type="text/babel" src="SearchResults.jsx"></script>
+
+  <script type="text/babel">
+    /* global React, ReactDOM, SearchResults */
+
+    let data = null;
+    try {
+      if (window.opener && window.opener.__previewData) {
+        data = window.opener.__previewData;
+        // store on self so preview.html can read it when opened from here
+        window.__previewData = data;
+      }
+    } catch (_) {}
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<SearchResults data={data} />);
+  </script>
+</body>
+</html>

@@ -305,7 +305,7 @@ function App() {
   const generate = () => {
     // Store on window so the new tab can read it via window.opener — no size limits
     window.__previewData = data;
-    window.open("preview.html", "_blank");
+    window.open("search-results.html", "_blank");
   };
 
   const copyShareLink = () => {
