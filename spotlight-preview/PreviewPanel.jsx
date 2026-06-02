@@ -103,6 +103,14 @@ function PreviewPanel({ data }) {
   const [showFullDesc, setShowFullDesc] = useStateP(false);
   const [detailsExpanded, setDetailsExpanded] = useStateP(true);
   const [renovateStyle, setRenovateStyle] = useStateP("Modern minimal");
+  const [season, setSeason] = useStateP("Summer");
+
+  const SEASON_IMAGE_MAP = {
+    "Summer": "assets/preview-photos/front-of-house.png",
+    "Spring": "assets/preview-photos/front-of-house.png",
+    "Fall":   "assets/preview-photos/front-of-house.png",
+    "Winter": "assets/preview-photos/Modern-Mid-Century/winter-house.png",
+  };
 
   const RENOVATE_AFTER_MAP = {
     "Modern minimal":     "assets/preview-photos/Modern-Mid-Century/modern-kitchen.png",
@@ -402,12 +410,20 @@ function PreviewPanel({ data }) {
                 <h4 className="sy-subtitle">See this home in different seasons</h4>
                 <div className="sy-card">
                   <div className="sy-season-wrap">
-                    <div className="sy-season-img" style={{ backgroundImage: `url(assets/preview-photos/front-of-house.png)` }}>
-                      <span className="season-badge"><Ic.Sparkle s={10} /> Fall</span>
+                    <div className="sy-season-img" style={{ backgroundImage: `url(${SEASON_IMAGE_MAP[season]})` }}>
+                      <span className="season-badge"><Ic.Sparkle s={10} /> {season}</span>
                     </div>
                   </div>
                   <div className="sy-controls">
-                    <AISelect label="Select an option" options={["Summer", "Spring", "Fall", "Winter"]} defaultVal="Summer" />
+                    <div className="ai-select-group">
+                      <div className="ai-select-label">Select an option <span className="ai-info">ⓘ</span></div>
+                      <select className="select ai-select-input" value={season} onChange={e => setSeason(e.target.value)}>
+                        <option>Summer</option>
+                        <option>Spring</option>
+                        <option>Fall</option>
+                        <option>Winter</option>
+                      </select>
+                    </div>
                     <button className="btn-ai-update">Update</button>
                   </div>
                 </div>
