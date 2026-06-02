@@ -106,10 +106,10 @@ function PreviewPanel({ data }) {
   const [season, setSeason] = useStateP("Summer");
 
   const SEASON_IMAGE_MAP = {
-    "Summer": "assets/preview-photos/front-of-house.png",
-    "Spring": "assets/preview-photos/front-of-house.png",
-    "Fall":   "assets/preview-photos/front-of-house.png",
-    "Winter": "assets/preview-photos/Modern-Mid-Century/winter-house.png",
+    "Summer": "assets/New-Preview-photos/Exterior.png",
+    "Spring": "assets/New-Preview-photos/Exterior.png",
+    "Fall":   "assets/New-Preview-photos/exterior-fall.png",
+    "Winter": "assets/New-Preview-photos/Exterior.png",
   };
 
   const RENOVATE_AFTER_MAP = {
