@@ -365,16 +365,16 @@ function PreviewPanel({ data }) {
                 <div className="sy-card">
                   <SplitViewer beforeUrl="assets/New-Preview-photos/Mid-century-bath.png" afterUrl="assets/New-Preview-photos/Bathroom.png" />
                   <div className="sy-controls">
-                    <AISelect label="Select an option" options={["Kitchen", "Living room", "Bathroom", "Bedroom"]} defaultVal="Kitchen" />
+                    <AISelect label="Select a room" options={["Kitchen", "Living room", "Bathroom", "Bedroom"]} defaultVal="Kitchen" />
                     <div className="ai-select-group">
-                      <div className="ai-select-label">Select an option <span className="ai-info">ⓘ</span></div>
+                      <div className="ai-select-label">Select a style <span className="ai-info">ⓘ</span></div>
                       <select className="select ai-select-input" value={renovateStyle} onChange={e => setRenovateStyle(e.target.value)}>
                         <option>Modern minimal</option>
                         <option>Mid-century modern</option>
                         <option>Coastal warm</option>
                       </select>
                     </div>
-                    <AISelect label="Select an option" options={["$10,000", "$25,000", "$50,000", "$100,000"]} defaultVal="$50,000" />
+                    <AISelect label="Select a budget" options={["$10,000", "$25,000", "$50,000", "$100,000"]} defaultVal="$50,000" />
                     <button className="btn-ai-update">Update</button>
                   </div>
                 </div>
