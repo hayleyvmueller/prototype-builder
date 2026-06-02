@@ -402,8 +402,7 @@ function PreviewPanel({ data }) {
                 <h4 className="sy-subtitle">See this home in different seasons</h4>
                 <div className="sy-card">
                   <div className="sy-season-wrap">
-                    <div className="sy-season-img" style={{ backgroundImage: hero ? `url(${hero.url})` : "none" }}>
-                      {!hero && <div className="ht-empty"><Ic.Image s={20} /></div>}
+                    <div className="sy-season-img" style={{ backgroundImage: `url(assets/preview-photos/front-of-house.png)` }}>
                       <span className="season-badge"><Ic.Sparkle s={10} /> Fall</span>
                     </div>
                   </div>
