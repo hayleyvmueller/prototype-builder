@@ -1458,19 +1458,21 @@ input, select, textarea { font-family: inherit; }
 .ac-listed-by { font-size: 11px; color: var(--text-alternate); }
 .ac-name { font-size: 16px; font-weight: 700; }
 .ac-brokerage { font-size: 13px; color: var(--text-alternate); }
-.ac-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.ac-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .ac-btn-outline {
-  padding: 10px 20px; border-radius: 999px;
-  border: 1.5px solid var(--text-base); background: white;
+  height: 44px; padding: 0 22px; border-radius: 999px;
+  border: 1.5px solid var(--gray-400); background: white;
   font-size: 14px; font-weight: 600; cursor: pointer;
   font-family: inherit; color: var(--text-base);
+  display: inline-flex; align-items: center;
 }
 .ac-btn-outline:hover { background: var(--gray-100); }
 .ac-btn-dark {
-  padding: 10px 20px; border-radius: 999px;
-  border: none; background: var(--text-base);
+  height: 44px; padding: 0 22px; border-radius: 999px;
+  border: none; background: #1A1816;
   font-size: 14px; font-weight: 600; cursor: pointer;
   font-family: inherit; color: white;
+  display: inline-flex; align-items: center;
 }
 .ac-btn-dark:hover { background: #333; }
 
