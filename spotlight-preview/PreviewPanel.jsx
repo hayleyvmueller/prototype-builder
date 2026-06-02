@@ -389,7 +389,7 @@ function PreviewPanel({ data }) {
               <div className="sy-subsection">
                 <h4 className="sy-subtitle">Stage this space</h4>
                 <div className="sy-card">
-                  <SplitViewer beforeUrl="assets/preview-photos/Modern-Mid-Century/modern-bathroom.png" afterUrl="assets/preview-photos/bathroom.png" />
+                  <SplitViewer beforeUrl="assets/preview-photos/bathroom.png" afterUrl="assets/preview-photos/Modern-Mid-Century/modern-bathroom.png" />
                   <div className="sy-controls">
                     <AISelect label="Select an option" options={["Foyer", "Living room", "Dining room", "Bedroom"]} defaultVal="Foyer" />
                     <AISelect label="Select an option" options={["Mid-century modern", "Modern minimal", "Coastal warm"]} defaultVal="Mid-century modern" />
