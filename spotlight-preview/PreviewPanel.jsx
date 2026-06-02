@@ -401,7 +401,7 @@ function PreviewPanel({ data }) {
                   </div>
                   <div className="sy-controls">
                     <div className="ai-select-group">
-                      <div className="ai-select-label">Select an option <span className="ai-info">ⓘ</span></div>
+                      <div className="ai-select-label">Select a season <span className="ai-info">ⓘ</span></div>
                       <select className="select ai-select-input" value={season} onChange={e => setSeason(e.target.value)}>
                         <option>Summer</option>
                         <option>Spring</option>
