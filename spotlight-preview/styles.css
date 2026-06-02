@@ -1487,8 +1487,8 @@ input, select, textarea { font-family: inherit; }
   font-size: 16px; font-weight: 600; margin: 0 0 14px;
 }
 .sy-card {
-  display: flex; flex-direction: column;
-  gap: 16px;
+  display: flex; flex-direction: row;
+  gap: 24px; align-items: flex-start;
 }
 
 /* Split viewer */
@@ -1521,7 +1521,7 @@ input, select, textarea { font-family: inherit; }
 }
 
 /* AI controls */
-.sy-controls { display: flex; flex-direction: row; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.sy-controls { display: flex; flex-direction: column; gap: 12px; }
 .ai-select-group { display: flex; flex-direction: column; gap: 4px; min-width: 160px; }
 .ai-select-label {
   font-size: 12px; color: var(--text-alternate); font-weight: 500;
