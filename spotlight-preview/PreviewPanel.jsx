@@ -407,7 +407,7 @@ function PreviewPanel({ data }) {
                     </div>
                   </div>
                   <div className="sy-controls">
-                    <AISelect label="Select an option" options={["Spring", "Summer", "Fall", "Winter"]} defaultVal="Fall" />
+                    <AISelect label="Select an option" options={["Summer", "Spring", "Fall", "Winter"]} defaultVal="Summer" />
                     <button className="btn-ai-update">Update</button>
                   </div>
                 </div>
