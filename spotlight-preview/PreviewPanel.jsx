@@ -206,14 +206,7 @@ function PreviewPanel({ data }) {
       {/* ── Hero grid ── */}
       <div className="hero-grid">
         <div className="hero-main">
-          <video
-            className="hm-video"
-            src="assets/walkthrough.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-          />
+          <div className="hm-video" style={{ backgroundImage: `url('assets/New Preview photos/video-walkthrough.gif')` }} />
 
           <div className="hm-topleft">
             <div className="badge-spotlight"><Ic.Bolt s={13} /> <span>Spotlight</span></div>
