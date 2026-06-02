@@ -1272,8 +1272,9 @@ input, select, textarea { font-family: inherit; }
   display: grid;
   grid-template-columns: 1fr 320px;
   height: 420px;
-  gap: 2px;
-  background: var(--gray-900);
+  gap: 6px;
+  padding: 6px;
+  background: var(--bg-base);
   overflow: hidden;
   position: relative;
   z-index: 0;
@@ -1282,6 +1283,7 @@ input, select, textarea { font-family: inherit; }
   position: relative;
   overflow: hidden;
   background: var(--gray-900);
+  border-radius: 12px;
 }
 .hm-blur-left, .hm-blur-right { display: none; }
 .hm-image {
@@ -1330,12 +1332,13 @@ input, select, textarea { font-family: inherit; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 2px;
-  background: var(--gray-900);
+  gap: 6px;
+  background: var(--bg-base);
 }
 .hero-thumb {
   position: relative; overflow: hidden; cursor: pointer;
   background: var(--gray-300);
+  border-radius: 10px;
 }
 .hero-thumb:hover .ht-img { transform: scale(1.04); }
 .ht-img {
