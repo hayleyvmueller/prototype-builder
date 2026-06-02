@@ -1128,7 +1128,7 @@ input, select, textarea { font-family: inherit; }
   padding: 8px;
 }
 .sr-card-inner {
-  border: 1px solid var(--gray-300);
+  border: none;
   border-radius: 8px;
   overflow: hidden;
   background: white;
@@ -1139,7 +1139,7 @@ input, select, textarea { font-family: inherit; }
 .sr-card-inner:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.14); }
 .sr-card-brokerage {
   font-size: 10px; color: var(--text-alternate);
-  padding: 6px 10px 0;
+  padding: 0 2px 4px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sr-card-img-wrap {

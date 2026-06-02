@@ -23,8 +23,8 @@ function fmtFull(n) { return `$${Number(n).toLocaleString("en-US")}`; }
 function PlaceholderCard({ p }) {
   return (
     <div className="sr-card">
+      <div className="sr-card-brokerage">Brokered by {p.brokerage}</div>
       <div className="sr-card-inner">
-        <div className="sr-card-brokerage">Brokered by {p.brokerage}</div>
         <div className="sr-card-img-wrap">
           <div className="sr-card-img" style={{ backgroundImage: `url(${p.img})` }} />
           {p.badge === "New" && <span className="sr-badge sr-badge-new">New</span>}
@@ -74,8 +74,8 @@ function SpotlightCard({ data }) {
 
   return (
     <div className="sr-card sr-card-spotlight" onClick={openPreview} style={{ cursor: "pointer" }}>
+      <div className="sr-card-brokerage">Brokered by {brokerage}</div>
       <div className="sr-card-inner">
-        <div className="sr-card-brokerage">Brokered by {brokerage}</div>
         <div className="sr-card-img-wrap">
           <div className="sr-card-img" style={{ backgroundImage: `url(${heroUrl})` }} />
           <span className="sr-badge sr-badge-spotlight"><Ic.Bolt s={10} /> Spotlight</span>
