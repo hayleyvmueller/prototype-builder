@@ -113,9 +113,9 @@ function PreviewPanel({ data }) {
   };
 
   const RENOVATE_AFTER_MAP = {
-    "Modern minimal":     "assets/preview-photos/bathroom.png",
-    "Mid-century modern": "assets/preview-photos/bathroom.png",
-    "Coastal warm":       "assets/preview-photos/bathroom.png",
+    "Modern minimal":     "assets/preview-photos/Modern-Mid-Century/modern-kitchen.png",
+    "Mid-century modern": "assets/preview-photos/Modern-Mid-Century/mid-century-kitchen-2.png",
+    "Coastal warm":       "assets/preview-photos/Modern-Mid-Century/modern-kitchen.png",
   };
 
   useEffectP(() => {
@@ -170,7 +170,7 @@ function PreviewPanel({ data }) {
   }).concat([{ url: FLYAROUND_URL, label: "FlyAround" }]);
 
   // Renovate split viewer: hardcoded kitchen before/after
-  const KITCHEN_BEFORE = "assets/preview-photos/bathroom.png";
+  const KITCHEN_BEFORE = "assets/preview-photos/kitchen.png";
 
   const aiPhoto1 = data.photos[0] ? data.photos[0].url : null;
   const aiPhoto2 = data.photos[1] ? data.photos[1].url : (data.photos[0] ? data.photos[0].url : null);
@@ -363,7 +363,7 @@ function PreviewPanel({ data }) {
               <div className="sy-subsection">
                 <h4 className="sy-subtitle">Renovate this space</h4>
                 <div className="sy-card">
-                  <SplitViewer beforeUrl="assets/New-Preview-photos/Mid-century-bath.png" afterUrl="assets/New-Preview-photos/Bathroom.png" />
+                  <SplitViewer beforeUrl={RENOVATE_AFTER_MAP[renovateStyle]} afterUrl={KITCHEN_BEFORE} />
                   <div className="sy-controls">
                     <AISelect label="Select a room" options={["Kitchen", "Living room", "Bathroom", "Bedroom"]} defaultVal="Kitchen" />
                     <div className="ai-select-group">
