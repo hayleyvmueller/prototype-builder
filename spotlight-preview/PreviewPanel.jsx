@@ -206,46 +206,21 @@ function PreviewPanel({ data }) {
       {/* ── Hero grid ── */}
       <div className="hero-grid">
         <div className="hero-main">
-          {hero ? (
-            <React.Fragment>
-              <div className="hm-blur-left" style={{ backgroundImage: `url(${hero.url})` }} />
-              <div className="hm-blur-right" style={{ backgroundImage: `url(${hero.url})` }} />
-              <div className="hm-image" style={{ backgroundImage: `url(${hero.url})` }} />
-            </React.Fragment>
-          ) : (
-            <div className="hero-placeholder">
-              <div className="ph-icon"><Ic.Image s={24} /></div>
-              <div>Upload photos to see hero image</div>
-            </div>
-          )}
+          <video
+            className="hm-video"
+            src="assets/walkthrough.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
 
           <div className="hm-topleft">
             <div className="badge-spotlight"><Ic.Bolt s={13} /> <span>Spotlight</span></div>
           </div>
-          <div className="hm-topright">{activePhoto + 1}/{photoCount}</div>
-
-          {photoCount > 1 && (
-            <React.Fragment>
-              <button className="hero-nav left" onClick={prev} aria-label="Previous photo"><Ic.ChevronLeft s={20} /></button>
-              <button className="hero-nav right" onClick={next} aria-label="Next photo"><Ic.ChevronRight s={20} /></button>
-            </React.Fragment>
-          )}
 
           <div className="hm-bottom">
-            <div className="hm-bottom-left">
-              {photoCount > 1 && (
-                <React.Fragment>
-                  <span className="hm-pause" onClick={() => setIsPlaying(p => !p)}>
-                    {isPlaying ? <Ic.Pause s={11} /> : <Ic.Play s={11} />}
-                  </span>
-                  <span className="dots">
-                    {data.photos.slice(0, 5).map((_, i) => (
-                      <span key={i} className={"dot" + (i === activePhoto % 5 ? " active" : "")} />
-                    ))}
-                  </span>
-                </React.Fragment>
-              )}
-            </div>
+            <div className="hm-bottom-left" />
             <div className="hm-bottom-right">
               <button className="btn-tour-pill"><Ic.Sparkle s={12} /> Virtual tour</button>
               <button className="btn-tour-pill">3D tour</button>
