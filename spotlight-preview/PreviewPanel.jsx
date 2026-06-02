@@ -391,7 +391,7 @@ function PreviewPanel({ data }) {
                 <div className="sy-card">
                   <SplitViewer beforeUrl="assets/preview-photos/Modern-Mid-Century/modern-bathroom.png" afterUrl="assets/preview-photos/bathroom.png" />
                   <div className="sy-controls">
-                    <AISelect label="Select an option" options={["Foyer", "Living room", "Dining room", "Bedroom"]} defaultVal="Foyer" />
+                    <AISelect label="Select an option" options={["Bathroom", "Foyer", "Living room", "Dining room", "Bedroom"]} defaultVal="Bathroom" />
                     <AISelect label="Select an option" options={["Mid-century modern", "Modern minimal", "Coastal warm"]} defaultVal="Mid-century modern" />
                     <button className="btn-ai-update">Update</button>
                   </div>
