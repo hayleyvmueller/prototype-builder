@@ -113,9 +113,9 @@ function PreviewPanel({ data }) {
   };
 
   const RENOVATE_AFTER_MAP = {
-    "Modern minimal":     "assets/New-Preview-photos/Mid-century-bath.png",
-    "Mid-century modern": "assets/New-Preview-photos/Mid-century-bath.png",
-    "Coastal warm":       "assets/New-Preview-photos/Mid-century-bath.png",
+    "Modern minimal":     "assets/preview-photos/bathroom.png",
+    "Mid-century modern": "assets/preview-photos/bathroom.png",
+    "Coastal warm":       "assets/preview-photos/bathroom.png",
   };
 
   useEffectP(() => {
@@ -363,7 +363,7 @@ function PreviewPanel({ data }) {
               <div className="sy-subsection">
                 <h4 className="sy-subtitle">Renovate this space</h4>
                 <div className="sy-card">
-                  <SplitViewer beforeUrl={RENOVATE_AFTER_MAP[renovateStyle]} afterUrl={KITCHEN_BEFORE} />
+                  <SplitViewer beforeUrl="assets/New-Preview-photos/Mid-century-bath.png" afterUrl="assets/preview-photos/bathroom.png" />
                   <div className="sy-controls">
                     <AISelect label="Select an option" options={["Kitchen", "Living room", "Bathroom", "Bedroom"]} defaultVal="Kitchen" />
                     <div className="ai-select-group">
