@@ -3,7 +3,7 @@ const { useState: useSt } = React;
 
 // ── Placeholder listings to fill the grid ──────────────────────────────────
 const PLACEHOLDERS = [
-  { price: 174900,  beds: 4, baths: 2,   sqft: 1137, lot: "6,673 sqft lot", addr: "2214 Ridgewood Terrace",  city: "Austin, TX 78745", label: "House for sale",                   badge: "New",       img: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&q=80", brokerage: "Lone Star Realty Group" },
+  { price: 174900,  beds: 4, baths: 2,   sqft: 1137, lot: "6,673 sqft lot", addr: "2214 Ridgewood Terrace",  city: "Austin, TX 78745", label: "House for sale",                   badge: "New",       img: "https://images.unsplash.com/photo-1558036117-15d82a90b9b1?w=600&q=80", brokerage: "Lone Star Realty Group" },
   { price: 189999,  beds: 2, baths: 1.5, sqft: 1136, lot: "4,430 sqft lot", addr: "408 Cedarbrook Lane",     city: "Austin, TX 78758", label: "Condo for sale",                    badge: null,        img: "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=600&q=80", brokerage: "Capital City Properties" },
   { price: 549000,  beds: 3, baths: 2,   sqft: 1820, lot: "5,227 sqft lot", addr: "1837 Sunflower Blvd",     city: "Austin, TX 78703", label: "House for sale",                    badge: null,        img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80", brokerage: "Bluebonnet Real Estate" },
   { price: 715000,  beds: 4, baths: 3,   sqft: 2480, lot: "7,100 sqft lot", addr: "5504 Maverick Hills Dr",  city: "Austin, TX 78752", label: "House for sale",                    badge: null,        img: "https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=600&q=80", brokerage: "Hill Country Home Co." },
