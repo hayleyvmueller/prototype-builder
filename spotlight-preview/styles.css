@@ -1438,6 +1438,42 @@ input, select, textarea { font-family: inherit; }
 }
 .btn-action-pill:hover { background: var(--gray-100); }
 
+/* ====== Agent card ====== */
+.agent-card {
+  margin-top: 16px;
+  border: 1px solid var(--border-base);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+}
+.ac-left { display: flex; align-items: center; gap: 14px; }
+.ac-avatar-wrap { flex-shrink: 0; }
+.ac-headshot {
+  width: 52px; height: 52px; border-radius: 999px;
+  object-fit: cover; display: block;
+  border: 1px solid var(--border-base);
+}
+.ac-info { display: flex; flex-direction: column; gap: 1px; }
+.ac-listed-by { font-size: 11px; color: var(--text-alternate); }
+.ac-name { font-size: 16px; font-weight: 700; }
+.ac-brokerage { font-size: 13px; color: var(--text-alternate); }
+.ac-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.ac-btn-outline {
+  padding: 10px 20px; border-radius: 999px;
+  border: 1.5px solid var(--text-base); background: white;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: inherit; color: var(--text-base);
+}
+.ac-btn-outline:hover { background: var(--gray-100); }
+.ac-btn-dark {
+  padding: 10px 20px; border-radius: 999px;
+  border: none; background: var(--text-base);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: inherit; color: white;
+}
+.ac-btn-dark:hover { background: #333; }
+
 /* ====== See yourself in this home ====== */
 .see-yourself {
   margin-top: 32px; padding-top: 32px;

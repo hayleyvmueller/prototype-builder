@@ -337,6 +337,24 @@ function PreviewPanel({ data }) {
             <button className="btn-action-pill">Ask a question</button>
           </div>
 
+          {/* Agent card */}
+          <div className="agent-card">
+            <div className="ac-left">
+              <div className="ac-avatar-wrap">
+                <img className="ac-headshot" src={headshot} alt={data.agentName || "Agent"} />
+              </div>
+              <div className="ac-info">
+                <div className="ac-listed-by">Listed by</div>
+                <div className="ac-name">{data.agentName || "Agent Name"}</div>
+                <div className="ac-brokerage">{data.brokerage || "Brokerage Name"}</div>
+              </div>
+            </div>
+            <div className="ac-actions">
+              <button className="ac-btn-outline">View profile</button>
+              <button className="ac-btn-dark">Email {(data.agentName || "Agent").split(" ")[0]}</button>
+            </div>
+          </div>
+
           {/* See yourself in this home */}
           {hasPhotos && (
             <div className="see-yourself">
