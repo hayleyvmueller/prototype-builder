@@ -411,7 +411,6 @@ function PreviewPanel({ data }) {
                 <div className="sy-card">
                   <div className="sy-season-wrap">
                     <div className="sy-season-img" style={{ backgroundImage: `url(${SEASON_IMAGE_MAP[season]})` }}>
-                      <span className="season-badge"><Ic.Sparkle s={10} /> {season}</span>
                     </div>
                   </div>
                   <div className="sy-controls">
