@@ -23,30 +23,32 @@ function fmtFull(n) { return `$${Number(n).toLocaleString("en-US")}`; }
 function PlaceholderCard({ p }) {
   return (
     <div className="sr-card">
-      <div className="sr-card-brokerage">Brokered by {p.brokerage}</div>
-      <div className="sr-card-img-wrap">
-        <div className="sr-card-img" style={{ backgroundImage: `url(${p.img})` }} />
-        {p.badge === "New" && <span className="sr-badge sr-badge-new">New</span>}
-        {p.badge === "Spotlight" && (
-          <span className="sr-badge sr-badge-spotlight"><Ic.Bolt s={10} /> Spotlight</span>
-        )}
-        <button className="sr-heart"><Ic.Heart s={16} /></button>
-      </div>
-      <div className="sr-card-body">
-        <div className="sr-card-label">{p.label}</div>
-        <div className="sr-card-price">{fmtFull(p.price)}</div>
-        <div className="sr-card-meta">
-          <span>{p.beds} bed</span>
-          <span className="dot">·</span>
-          <span>{p.baths} bath</span>
-          <span className="dot">·</span>
-          <span>{p.sqft.toLocaleString()} sqft</span>
-          <span className="dot">·</span>
-          <span>{p.lot}</span>
+      <div className="sr-card-inner">
+        <div className="sr-card-brokerage">Brokered by {p.brokerage}</div>
+        <div className="sr-card-img-wrap">
+          <div className="sr-card-img" style={{ backgroundImage: `url(${p.img})` }} />
+          {p.badge === "New" && <span className="sr-badge sr-badge-new">New</span>}
+          {p.badge === "Spotlight" && (
+            <span className="sr-badge sr-badge-spotlight"><Ic.Bolt s={10} /> Spotlight</span>
+          )}
+          <button className="sr-heart"><Ic.Heart s={16} /></button>
         </div>
-        <div className="sr-card-addr">{p.addr}</div>
-        <div className="sr-card-city">{p.city}</div>
-        <button className="sr-email-btn">Email agent</button>
+        <div className="sr-card-body">
+          <div className="sr-card-label"><span className="sr-card-label-dot" />{p.label}</div>
+          <div className="sr-card-price">{fmtFull(p.price)}</div>
+          <div className="sr-card-meta">
+            <span>{p.beds} bed</span>
+            <span className="dot">·</span>
+            <span>{p.baths} bath</span>
+            <span className="dot">·</span>
+            <span>{p.sqft.toLocaleString()} sqft</span>
+            <span className="dot">·</span>
+            <span>{p.lot}</span>
+          </div>
+          <div className="sr-card-addr">{p.addr}</div>
+          <div className="sr-card-city">{p.city}</div>
+          <button className="sr-email-btn">Email agent</button>
+        </div>
       </div>
     </div>
   );
@@ -72,29 +74,31 @@ function SpotlightCard({ data }) {
 
   return (
     <div className="sr-card sr-card-spotlight" onClick={openPreview} style={{ cursor: "pointer" }}>
-      <div className="sr-card-brokerage">Brokered by {brokerage}</div>
-      <div className="sr-card-img-wrap">
-        <div className="sr-card-img" style={{ backgroundImage: `url(${heroUrl})` }} />
-        <span className="sr-badge sr-badge-spotlight"><Ic.Bolt s={10} /> Spotlight</span>
-        <button className="sr-heart" onClick={e => e.stopPropagation()}><Ic.Heart s={16} /></button>
-        {data && data.photos && data.photos.length > 1 && (
-          <button className="sr-next-arrow"><Ic.ChevronRight s={16} /></button>
-        )}
-      </div>
-      <div className="sr-card-body">
-        <div className="sr-card-label">{label}</div>
-        <div className="sr-card-price">{price}</div>
-        <div className="sr-card-meta">
-          <span>{beds} bed</span>
-          <span className="dot">·</span>
-          <span>{baths} bath</span>
-          <span className="dot">·</span>
-          <span>{sqft} sqft</span>
-          {lot && <React.Fragment><span className="dot">·</span><span>{lot}</span></React.Fragment>}
+      <div className="sr-card-inner">
+        <div className="sr-card-brokerage">Brokered by {brokerage}</div>
+        <div className="sr-card-img-wrap">
+          <div className="sr-card-img" style={{ backgroundImage: `url(${heroUrl})` }} />
+          <span className="sr-badge sr-badge-spotlight"><Ic.Bolt s={10} /> Spotlight</span>
+          <button className="sr-heart" onClick={e => e.stopPropagation()}><Ic.Heart s={16} /></button>
+          {data && data.photos && data.photos.length > 1 && (
+            <button className="sr-next-arrow"><Ic.ChevronRight s={16} /></button>
+          )}
         </div>
-        <div className="sr-card-addr">{addr}</div>
-        <div className="sr-card-city">{city}</div>
-        <button className="sr-email-btn" onClick={e => { e.stopPropagation(); openPreview(); }}>View listing</button>
+        <div className="sr-card-body">
+          <div className="sr-card-label"><span className="sr-card-label-dot" />{label}</div>
+          <div className="sr-card-price">{price}</div>
+          <div className="sr-card-meta">
+            <span>{beds} bed</span>
+            <span className="dot">·</span>
+            <span>{baths} bath</span>
+            <span className="dot">·</span>
+            <span>{sqft} sqft</span>
+            {lot && <React.Fragment><span className="dot">·</span><span>{lot}</span></React.Fragment>}
+          </div>
+          <div className="sr-card-addr">{addr}</div>
+          <div className="sr-card-city">{city}</div>
+          <button className="sr-email-btn" onClick={e => { e.stopPropagation(); openPreview(); }}>View listing</button>
+        </div>
       </div>
     </div>
   );

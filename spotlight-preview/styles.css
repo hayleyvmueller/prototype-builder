@@ -1126,19 +1126,25 @@ input, select, textarea { font-family: inherit; }
 /* Card */
 .sr-card {
   padding: 8px;
-  border-bottom: 1px solid var(--gray-100);
 }
-.sr-card-spotlight {
+.sr-card-inner {
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   transition: box-shadow 150ms;
+  display: flex; flex-direction: column;
 }
-.sr-card-spotlight:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 8px; }
+.sr-card-inner:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.14); }
 .sr-card-brokerage {
   font-size: 10px; color: var(--text-alternate);
-  margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding: 6px 10px 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sr-card-img-wrap {
-  position: relative; border-radius: 8px; overflow: hidden;
-  aspect-ratio: 4/3; background: var(--gray-200); margin-bottom: 8px;
+  position: relative;
+  aspect-ratio: 4/3; background: var(--gray-200);
 }
 .sr-card-img {
   width: 100%; height: 100%;
@@ -1166,16 +1172,24 @@ input, select, textarea { font-family: inherit; }
   display: flex; align-items: center; justify-content: center;
   color: white;
 }
-.sr-card-body { padding: 0 2px; }
-.sr-card-label { font-size: 12px; color: var(--text-alternate); margin-bottom: 2px; display: flex; align-items: center; gap: 4px; }
+.sr-card-body { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; }
+.sr-card-label {
+  font-size: 12px; color: var(--text-alternate); margin-bottom: 2px;
+  display: flex; align-items: center; gap: 5px;
+}
+.sr-card-label-dot {
+  width: 8px; height: 8px; border-radius: 999px;
+  background: var(--status-success); flex-shrink: 0;
+}
 .sr-card-price { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 3px; }
 .sr-card-meta { font-size: 12px; color: var(--text-base); display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 3px; }
 .sr-card-meta .dot { color: var(--gray-400); }
 .sr-card-addr { font-size: 13px; font-weight: 500; }
-.sr-card-city { font-size: 12px; color: var(--text-alternate); margin-bottom: 8px; }
+.sr-card-city { font-size: 12px; color: var(--text-alternate); margin-bottom: 10px; flex: 1; }
 .sr-email-btn {
-  width: 100%; padding: 8px; border-radius: 8px;
-  border: 1px solid var(--border-base); background: white;
+  width: 100%; padding: 9px;
+  border: 1px solid var(--border-base); border-radius: 6px;
+  background: white;
   font-size: 13px; font-weight: 600; cursor: pointer;
   font-family: inherit; color: var(--text-base);
 }
