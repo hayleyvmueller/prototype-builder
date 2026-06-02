@@ -1187,11 +1187,12 @@ input, select, textarea { font-family: inherit; }
 .sr-card-addr { font-size: 13px; font-weight: 500; }
 .sr-card-city { font-size: 12px; color: var(--text-alternate); margin-bottom: 10px; flex: 1; }
 .sr-email-btn {
-  width: 100%; padding: 9px;
-  border: 1px solid var(--border-base); border-radius: 6px;
+  width: 100%; padding: 8px 10px;
+  border: 1px solid var(--gray-300); border-radius: 4px;
   background: white;
-  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-size: 13px; font-weight: 400; cursor: pointer;
   font-family: inherit; color: var(--text-base);
+  text-align: center;
 }
 .sr-email-btn:hover { background: var(--gray-100); }
 
