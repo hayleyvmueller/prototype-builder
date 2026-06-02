@@ -1273,7 +1273,7 @@ input, select, textarea { font-family: inherit; }
   grid-template-columns: 1fr 320px;
   height: 420px;
   gap: 6px;
-  padding: 6px;
+  padding: 0 6px;
   background: var(--bg-base);
   overflow: hidden;
   position: relative;
