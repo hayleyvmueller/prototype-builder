@@ -104,7 +104,7 @@ function SpotlightCard({ data }) {
               <div className="sr-card-addr">{addr}</div>
               <div className="sr-card-city">{city}</div>
             </div>
-            <button className="sr-email-btn" onClick={e => { e.stopPropagation(); openPreview(); }}>View listing</button>
+            <button className="sr-email-btn" onClick={e => { e.stopPropagation(); openPreview(); }}>Email agent</button>
           </div>
         </div>
       </div>
