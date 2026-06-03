@@ -102,7 +102,7 @@ function PreviewPanel({ data }) {
   const [isPlaying, setIsPlaying] = useStateP(true);
   const [showFullDesc, setShowFullDesc] = useStateP(false);
   const [detailsExpanded, setDetailsExpanded] = useStateP(true);
-  const [renovateStyle, setRenovateStyle] = useStateP("Modern minimal");
+  const [renovateStyle, setRenovateStyle] = useStateP("Mid-century modern");
   const [season, setSeason] = useStateP("Summer");
 
   const SEASON_IMAGE_MAP = {
@@ -365,7 +365,7 @@ function PreviewPanel({ data }) {
                 <div className="sy-card">
                   <SplitViewer beforeUrl="assets/New-Preview-photos/Mid-century-bath.png" afterUrl="assets/New-Preview-photos/Bathroom.png" />
                   <div className="sy-controls">
-                    <AISelect label="Select a room" options={["Kitchen", "Living room", "Bathroom", "Bedroom"]} defaultVal="Kitchen" />
+                    <AISelect label="Select a room" options={["Bathroom", "Kitchen", "Living room", "Bedroom"]} defaultVal="Bathroom" />
                     <div className="ai-select-group">
                       <div className="ai-select-label">Select a style <span className="ai-info">ⓘ</span></div>
                       <select className="select ai-select-input" value={renovateStyle} onChange={e => setRenovateStyle(e.target.value)}>
