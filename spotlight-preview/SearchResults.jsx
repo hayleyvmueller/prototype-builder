@@ -173,9 +173,8 @@ function SearchResults({ data }) {
 
       {/* ── Grid ── */}
       <div className="sr-grid">
-        {PLACEHOLDERS.slice(0, 2).map((p, i) => <PlaceholderCard key={i} p={p} />)}
         <SpotlightCard data={data} />
-        {PLACEHOLDERS.slice(2).map((p, i) => <PlaceholderCard key={i + 2} p={p} />)}
+        {PLACEHOLDERS.map((p, i) => <PlaceholderCard key={i} p={p} />)}
         {/* Ad slot */}
         <div className="sr-ad-slot">
           <div className="sr-ad-inner">Advertisement</div>
