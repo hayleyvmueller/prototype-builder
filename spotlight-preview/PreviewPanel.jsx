@@ -148,19 +148,23 @@ function PreviewPanel({ data }) {
   const agentInitials = (data.agentName || "AN").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const brokerageInitials = (data.brokerage || "B").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 
-  // Pick a consistent headshot based on agent name
-  const HEADSHOTS = [
-    "https://randomuser.me/api/portraits/women/44.jpg",
-    "https://randomuser.me/api/portraits/men/32.jpg",
-    "https://randomuser.me/api/portraits/women/68.jpg",
-    "https://randomuser.me/api/portraits/men/75.jpg",
-    "https://randomuser.me/api/portraits/women/26.jpg",
-    "https://randomuser.me/api/portraits/men/46.jpg",
-  ];
-  const nameHash = (data.agentName || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  const headshot = HEADSHOTS[nameHash % HEADSHOTS.length];
+  // Agent photo lookup by name
+  const AGENT_PHOTO_MAP = {
+    "Mike Thomas":    { headshot: "assets/Team Photos/Mike-Thomas.jpg",         brokerage: "assets/Team Photos/Berkshire.jpg" },
+    "James McClain":  { headshot: "assets/Team Photos/James-McClain.jpg",        brokerage: null },
+    "Beth Egoavil":   { headshot: "assets/Team Photos/Bethanne-Egoavil.webp",    brokerage: null },
+    "Lauren Bowen":   { headshot: "assets/Team Photos/Lauren-Bowen-North.jpg",   brokerage: "assets/Team Photos/LPT.png" },
+    "Greg Williams":  { headshot: "assets/Team Photos/Greg-Williams.jpg",        brokerage: "assets/Team Photos/ERA.jpg" },
+    "KeeKee Jordan":  { headshot: "assets/Team Photos/KeeKee-Jordan.jpg",        brokerage: "assets/Team Photos/ERA.jpg" },
+  };
 
-  // Brokerage brand color (hash-based)
+  const agentLookup = AGENT_PHOTO_MAP[data.agentName] || null;
+  const headshot = agentLookup
+    ? agentLookup.headshot
+    : "https://randomuser.me/api/portraits/women/44.jpg";
+  const brokerageLogo = agentLookup ? agentLookup.brokerage : null;
+
+  // Fallback brokerage badge color
   const BROKERAGE_COLORS = ["#D92228", "#b91c1c", "#1d4ed8", "#0f766e", "#7c3aed", "#c2410c"];
   const brkHash = (data.brokerage || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
   const brokerageColor = BROKERAGE_COLORS[brkHash % BROKERAGE_COLORS.length];
@@ -251,9 +255,10 @@ function PreviewPanel({ data }) {
       <div className="agent-attr-bar">
         <div className="aa-avatar-wrap">
           <img className="aa-headshot" src={headshot} alt={data.agentName || "Agent"} />
-          <div className="aa-brokerage-badge" style={{ background: brokerageColor }}>
-            {brokerageInitials}
-          </div>
+          {brokerageLogo
+            ? <img className="aa-brokerage-badge aa-brokerage-logo" src={brokerageLogo} alt={data.brokerage} />
+            : <div className="aa-brokerage-badge" style={{ background: brokerageColor }}>{brokerageInitials}</div>
+          }
         </div>
         <div className="aa-text">
           Listed by <strong>{data.agentName || "Agent Name"}</strong>

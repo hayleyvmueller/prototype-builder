@@ -1392,6 +1392,10 @@ input, select, textarea { font-family: inherit; }
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
+.aa-brokerage-logo {
+  width: 26px; height: 26px; border-radius: 999px;
+  object-fit: cover; background: white;
+}
 .aa-text { font-size: 13px; line-height: 18px; }
 .aa-text strong { font-weight: 600; }
 .aa-sep { margin: 0 4px; opacity: 0.5; }
