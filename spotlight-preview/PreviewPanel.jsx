@@ -148,17 +148,43 @@ function PreviewPanel({ data }) {
   const agentInitials = (data.agentName || "AN").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const brokerageInitials = (data.brokerage || "B").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 
-  // Agent photo lookup by name
-  const AGENT_PHOTO_MAP = {
-    "Mike Thomas":    { headshot: "assets/Team Photos/Mike-Thomas.jpg",         brokerage: "assets/Team Photos/Berkshire.jpg" },
-    "James McClain":  { headshot: "assets/Team Photos/James-McClain.jpg",        brokerage: null },
-    "Beth Egoavil":   { headshot: "assets/Team Photos/Bethanne-Egoavil.webp",    brokerage: null },
-    "Lauren Bowen":   { headshot: "assets/Team Photos/Lauren-Bowen-North.jpg",   brokerage: "assets/Team Photos/LPT.png" },
-    "Greg Williams":  { headshot: "assets/Team Photos/Greg-Williams.jpg",        brokerage: "assets/Team Photos/ERA.jpg" },
-    "KeeKee Jordan":  { headshot: "assets/Team Photos/KeeKee-Jordan.jpg",        brokerage: "assets/Team Photos/ERA.jpg" },
+  // Agent photo lookup — fuzzy match by first/last name, typo-tolerant
+  const AGENT_PHOTO_MAP = [
+    { keys: ["mike", "thomas"],             data: { headshot: "assets/Team Photos/Mike-Thomas.jpg",       brokerage: "assets/Team Photos/Berkshire.jpg" } },
+    { keys: ["james", "mcclain", "mclain"], data: { headshot: "assets/Team Photos/James-McClain.jpg",     brokerage: null } },
+    { keys: ["beth", "bethanne", "egoavil"],data: { headshot: "assets/Team Photos/Bethanne-Egoavil.webp", brokerage: null } },
+    { keys: ["lauren", "bowen"],            data: { headshot: "assets/Team Photos/Lauren-Bowen-North.jpg",brokerage: "assets/Team Photos/LPT.png" } },
+    { keys: ["greg", "williams"],           data: { headshot: "assets/Team Photos/Greg-Williams.jpg",     brokerage: "assets/Team Photos/ERA.jpg" } },
+    { keys: ["keekee", "kee", "jordan"],    data: { headshot: "assets/Team Photos/KeeKee-Jordan.jpg",     brokerage: "assets/Team Photos/ERA.jpg" } },
+  ];
+
+  // Simple edit distance for typo tolerance
+  const editDist = (a, b) => {
+    const m = a.length, n = b.length;
+    const dp = Array.from({length: m+1}, (_, i) => Array.from({length: n+1}, (_, j) => i === 0 ? j : j === 0 ? i : 0));
+    for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    return dp[m][n];
   };
 
-  const agentLookup = AGENT_PHOTO_MAP[data.agentName] || null;
+  const fuzzyMatch = (input) => {
+    if (!input) return null;
+    const words = input.toLowerCase().replace(/[^a-z\s]/g, "").split(/\s+/).filter(Boolean);
+    for (const entry of AGENT_PHOTO_MAP) {
+      for (const word of words) {
+        for (const key of entry.keys) {
+          // exact contains OR edit distance ≤ 2 for words of length ≥ 4
+          if (word === key || key.includes(word) || word.includes(key) ||
+              (word.length >= 4 && key.length >= 4 && editDist(word, key) <= 2)) {
+            return entry.data;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  const agentLookup = fuzzyMatch(data.agentName);
   const headshot = agentLookup
     ? agentLookup.headshot
     : "https://randomuser.me/api/portraits/women/44.jpg";
