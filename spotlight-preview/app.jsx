@@ -117,8 +117,11 @@ function FormPage({ data, set, onGenerate, onCopyLink, isCopied }) {
     set((d) => ({ ...d, [key]: v === "" ? 0 : Number(v) }));
   };
   const updatePrice = (e) => {
-    const v = e.target.value.replace(/[^0-9]/g, "");
-    set((d) => ({ ...d, price: v === "" ? 0 : Number(v) }));
+    const v = e.target.value;
+    // If it's purely numeric, store as number; otherwise store as string for display
+    const numeric = v.replace(/[^0-9]/g, "");
+    const isNumeric = v === numeric;
+    set((d) => ({ ...d, price: v === "" ? 0 : isNumeric ? Number(v) : v }));
   };
 
   const hasPhotos = data.photos.length > 0;
@@ -174,8 +177,8 @@ function FormPage({ data, set, onGenerate, onCopyLink, isCopied }) {
                     <span className="prefix">$</span>
                     <input
                       className="input with-prefix"
-                      type="text" inputMode="numeric"
-                      value={data.price > 0 ? data.price.toLocaleString("en-US") : ""}
+                      type="text"
+                      value={typeof data.price === "string" ? data.price : data.price > 0 ? data.price.toLocaleString("en-US") : ""}
                       onChange={updatePrice}
                       placeholder="865,000"
                     />

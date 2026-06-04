@@ -132,7 +132,11 @@ function PreviewPanel({ data }) {
   const photoCount = data.photos.length || 1;
   const hasPhotos = data.photos.length > 0;
 
-  const fmtPrice = n => n > 0 ? `$${Number(n).toLocaleString("en-US")}` : "$—";
+  const fmtPrice = n => {
+    if (!n || n === 0) return "$—";
+    if (typeof n === "string") return n.startsWith("$") ? n : `$${n}`;
+    return `$${Number(n).toLocaleString("en-US")}`;
+  };
   const fmtNumber = n => n > 0 ? Number(n).toLocaleString("en-US") : "—";
   const monthly = data.price > 0 ? Math.round(data.price * 0.006) : 0;
   const pricePerSqft = data.price > 0 && data.sqft > 0 ? Math.round(data.price / data.sqft) : 0;
