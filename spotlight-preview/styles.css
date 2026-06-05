@@ -1373,11 +1373,11 @@ input, select, textarea { font-family: inherit; }
 }
 .aa-avatar-wrap {
   position: relative;
-  width: 52px; height: 52px; flex-shrink: 0;
-  margin-top: -26px; /* bleed 50% above the bar */
+  width: 90px; height: 90px; flex-shrink: 0;
+  margin-top: -45px; /* bleed 50% above the bar */
 }
 .aa-headshot {
-  width: 52px; height: 52px; border-radius: 999px;
+  width: 90px; height: 90px; border-radius: 999px;
   object-fit: cover;
   border: 2px solid white;
   display: block;
@@ -1385,16 +1385,17 @@ input, select, textarea { font-family: inherit; }
 }
 .aa-brokerage-badge {
   position: absolute; bottom: -2px; right: -2px;
-  width: 22px; height: 22px; border-radius: 999px;
-  background: #1d4ed8; color: white;
+  width: 50px; height: 50px; border-radius: 999px;
+  background: white;
   display: flex; align-items: center; justify-content: center;
-  font-size: 7px; font-weight: 800; letter-spacing: -0.3px;
+  font-size: 10px; font-weight: 800; letter-spacing: -0.3px;
   border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  overflow: hidden;
 }
 .aa-brokerage-logo {
-  width: 26px; height: 26px; border-radius: 999px;
-  object-fit: cover; background: white;
+  width: 46px; height: 46px; border-radius: 999px;
+  object-fit: contain; background: white;
 }
 .aa-text { font-size: 13px; line-height: 18px; }
 .aa-text strong { font-weight: 600; }
