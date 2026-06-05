@@ -158,7 +158,7 @@ function PreviewPanel({ data }) {
     { keys: ["keekee", "kee", "jordan"],           data: { headshot: "assets/Team Photos/KeeKee-Jordan.jpg",       brokerage: "assets/Team Photos/ERA.jpg" } },
     { keys: ["faron", "winslow", "king"],          data: { headshot: "assets/Team Photos/FaronKing.webp",          brokerage: "assets/Team Photos/ColdwellBanker.jpg" } },
     { keys: ["lauren", "klimoff"],                 data: { headshot: "assets/Team Photos/LaurenKimoff.webp",       brokerage: "assets/Team Photos/UR.webp" } },
-    { keys: ["lauren", "wemert"],                  data: { headshot: "assets/Team Photos/wemert.webp",             brokerage: "assets/Team Photos/wemertgroup.png" } },
+    { keys: ["jenny", "jennifer", "wemert"],        data: { headshot: "assets/Team Photos/wemert.webp",             brokerage: "assets/Team Photos/wemertgroup.png" } },
   ];
 
   // Simple edit distance for typo tolerance
