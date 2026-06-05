@@ -150,12 +150,15 @@ function PreviewPanel({ data }) {
 
   // Agent photo lookup — fuzzy match by first/last name, typo-tolerant
   const AGENT_PHOTO_MAP = [
-    { keys: ["mike", "thomas"],             data: { headshot: "assets/Team Photos/Mike-Thomas.jpg",       brokerage: "assets/Team Photos/Berkshire.jpg" } },
-    { keys: ["james", "mcclain", "mclain"], data: { headshot: "assets/Team Photos/James-McClain.jpg",     brokerage: null } },
-    { keys: ["beth", "bethanne", "egoavil"],data: { headshot: "assets/Team Photos/Bethanne-Egoavil.webp", brokerage: null } },
-    { keys: ["lauren", "bowen"],            data: { headshot: "assets/Team Photos/Lauren-Bowen-North.jpg",brokerage: "assets/Team Photos/LPT.png" } },
-    { keys: ["greg", "williams"],           data: { headshot: "assets/Team Photos/Greg-Williams.jpg",     brokerage: "assets/Team Photos/ERA.jpg" } },
-    { keys: ["keekee", "kee", "jordan"],    data: { headshot: "assets/Team Photos/KeeKee-Jordan.jpg",     brokerage: "assets/Team Photos/ERA.jpg" } },
+    { keys: ["mike", "thomas"],                    data: { headshot: "assets/Team Photos/Mike-Thomas.jpg",         brokerage: "assets/Team Photos/Berkshire.jpg" } },
+    { keys: ["james", "mcclain", "mclain"],        data: { headshot: "assets/Team Photos/James-McClain.jpg",       brokerage: "assets/Team Photos/Realty87.jpg" } },
+    { keys: ["beth", "bethanne", "egoavil"],       data: { headshot: "assets/Team Photos/Bethanne-Egoavil.webp",   brokerage: "assets/Team Photos/GregTx.svg" } },
+    { keys: ["lauren", "bowen", "north"],          data: { headshot: "assets/Team Photos/Lauren-Bowen-North.jpg",  brokerage: "assets/Team Photos/LPT.png" } },
+    { keys: ["greg", "williams"],                  data: { headshot: "assets/Team Photos/Greg-Williams.jpg",       brokerage: "assets/Team Photos/ERA.jpg" } },
+    { keys: ["keekee", "kee", "jordan"],           data: { headshot: "assets/Team Photos/KeeKee-Jordan.jpg",       brokerage: "assets/Team Photos/ERA.jpg" } },
+    { keys: ["faron", "winslow", "king"],          data: { headshot: "assets/Team Photos/FaronKing.webp",          brokerage: "assets/Team Photos/ColdwellBanker.jpg" } },
+    { keys: ["lauren", "klimoff"],                 data: { headshot: "assets/Team Photos/LaurenKimoff.webp",       brokerage: "assets/Team Photos/UR.webp" } },
+    { keys: ["lauren", "wemert"],                  data: { headshot: "assets/Team Photos/wemert.webp",             brokerage: "assets/Team Photos/wemertgroup.png" } },
   ];
 
   // Simple edit distance for typo tolerance
@@ -170,18 +173,21 @@ function PreviewPanel({ data }) {
   const fuzzyMatch = (input) => {
     if (!input) return null;
     const words = input.toLowerCase().replace(/[^a-z\s]/g, "").split(/\s+/).filter(Boolean);
+    // Score each entry: +2 for last key match (last name), +1 for other key match
+    let bestEntry = null, bestScore = 0;
     for (const entry of AGENT_PHOTO_MAP) {
-      for (const word of words) {
-        for (const key of entry.keys) {
-          // exact contains OR edit distance ≤ 2 for words of length ≥ 4
-          if (word === key || key.includes(word) || word.includes(key) ||
-              (word.length >= 4 && key.length >= 4 && editDist(word, key) <= 2)) {
-            return entry.data;
-          }
+      let score = 0;
+      entry.keys.forEach((key, ki) => {
+        const isLastName = ki === entry.keys.length - 1;
+        for (const word of words) {
+          const matched = word === key || key.includes(word) || word.includes(key) ||
+            (word.length >= 4 && key.length >= 4 && editDist(word, key) <= 2);
+          if (matched) score += isLastName ? 2 : 1;
         }
-      }
+      });
+      if (score > bestScore) { bestScore = score; bestEntry = entry.data; }
     }
-    return null;
+    return bestScore > 0 ? bestEntry : null;
   };
 
   const agentLookup = fuzzyMatch(data.agentName);
