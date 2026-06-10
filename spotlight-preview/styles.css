@@ -1400,6 +1400,18 @@ input, select, textarea { font-family: inherit; }
 .aa-text { font-size: 13px; line-height: 18px; padding-left: 20px; }
 .aa-text strong { font-weight: 600; }
 .aa-sep { margin: 0 4px; opacity: 0.5; }
+/* Initials fallback for agent bar */
+.aa-initials-circle {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 700; color: white;
+  letter-spacing: -0.5px;
+}
+/* Initials fallback for agent card */
+.ac-initials-circle {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: white;
+  letter-spacing: -0.3px;
+}
 
 /* ====== About section ====== */
 .about-section {

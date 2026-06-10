@@ -191,9 +191,6 @@ function PreviewPanel({ data }) {
   };
 
   const agentLookup = fuzzyMatch(data.agentName);
-  const headshot = agentLookup
-    ? agentLookup.headshot
-    : "https://randomuser.me/api/portraits/women/44.jpg";
   const brokerageLogo = agentLookup ? agentLookup.brokerage : null;
 
   // Fallback brokerage badge color
@@ -286,7 +283,10 @@ function PreviewPanel({ data }) {
       {/* ── Agent bar ── */}
       <div className="agent-attr-bar">
         <div className="aa-avatar-wrap">
-          <img className="aa-headshot" src={headshot} alt={data.agentName || "Agent"} />
+          {agentLookup
+            ? <img className="aa-headshot" src={agentLookup.headshot} alt={data.agentName || "Agent"} />
+            : <div className="aa-headshot aa-initials-circle" style={{ background: brokerageColor }}>{agentInitials}</div>
+          }
           {brokerageLogo
             ? <img className="aa-brokerage-badge aa-brokerage-logo" src={brokerageLogo} alt={data.brokerage} />
             : <div className="aa-brokerage-badge" style={{ background: brokerageColor }}>{brokerageInitials}</div>
@@ -382,7 +382,10 @@ function PreviewPanel({ data }) {
           <div className="agent-card">
             <div className="ac-left">
               <div className="ac-avatar-wrap">
-                <img className="ac-headshot" src={headshot} alt={data.agentName || "Agent"} />
+                {agentLookup
+                  ? <img className="ac-headshot" src={agentLookup.headshot} alt={data.agentName || "Agent"} />
+                  : <div className="ac-headshot ac-initials-circle" style={{ background: brokerageColor }}>{agentInitials}</div>
+                }
               </div>
               <div className="ac-info">
                 <div className="ac-listed-by">Listed by</div>
