@@ -363,6 +363,31 @@
   .modal-card-desc { font-size: 14px; color: #616f86; line-height: 20px; }
   .modal-footer { display: flex; justify-content: flex-end; }
 
+  /* ── Featured photo thumbnails (ready state) ─────────── */
+  .featured-thumb { width: 76px; height: 51px; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+  .featured-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* ── Success toast ───────────────────────────────────── */
+  .toast {
+    position: fixed;
+    top: 117px;
+    right: 24px;
+    width: 456px;
+    background: #0a801f;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.14);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    z-index: 200;
+    color: white;
+  }
+  .toast svg { width: 24px; height: 24px; flex-shrink: 0; }
+  .toast p { flex: 1; font-size: 14px; line-height: 18px; }
+  .toast .close { background: none; border: none; cursor: pointer; padding: 0; display: flex; }
+  .toast .close svg { width: 20px; height: 20px; }
+
   /* ── Before/after slider ──────────────────────────────── */
   .vs-slider { position: relative; overflow: hidden; cursor: col-resize; user-select: none; }
   .vs-after { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -386,6 +411,15 @@
 </style>
 </head>
 <body>
+
+<!-- Success toast (post-publish) -->
+<div class="toast" id="upload-toast" style="display:none;">
+  <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="white"/><path d="M8 12l3 3 5-6" stroke="#0a801f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <p>Your photos have been successfully uploaded.</p>
+  <button class="close" onclick="this.parentElement.style.display='none'">
+    <svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg>
+  </button>
+</div>
 
 <!-- Top hat -->
 <div class="tophat">
@@ -470,8 +504,8 @@
         </div>
       </div>
 
-      <!-- Immersive media card -->
-      <div class="card">
+      <!-- Immersive media card — default (setup) state -->
+      <div class="card" id="immersive-card-setup">
         <div class="card-header-row">
           <div class="card-header-left">
             <div class="card-title-row">
@@ -504,6 +538,37 @@
               <span class="feature-title">Home updates</span>
               <span class="feature-desc">Show your buyers a more immersive view of the home</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Immersive media card — ready (post-publish) state -->
+      <div class="card" id="immersive-card-ready" style="display:none;">
+        <div class="card-header-row">
+          <div class="card-header-left">
+            <div class="card-title-row">
+              <span class="card-title">Your immersive media photos are ready</span>
+            </div>
+            <p class="card-desc">You've added your featured photos. Promote this listing with Spotlight Listings to activate the immersive experience.</p>
+          </div>
+          <div style="display:flex; gap:16px; align-items:center;">
+            <button class="btn-secondary" style="padding:16px 24px; font-size:16px; font-weight:700;" onclick="window.location.href='immersive-media-upload.html'">Edit photos</button>
+            <button class="btn-primary" style="display:flex; gap:10px; align-items:center;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13l1-8z"/></svg>
+              Promote listing
+            </button>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <p class="card-desc">Featured photos</p>
+          <div style="display:flex; gap:8px;">
+            <div class="featured-thumb"><img src="assets/sample-bedroom.png" alt=""></div>
+            <div class="featured-thumb"><img src="assets/sample-kitchen.png" alt=""></div>
+            <div class="featured-thumb"><img src="assets/sample-living-room.png" alt=""></div>
+            <div class="featured-thumb"><img src="assets/sample-bathroom.png" alt=""></div>
+            <div class="featured-thumb"><img src="assets/sample-front-of-house.png" alt=""></div>
+            <div class="featured-thumb"><img src="assets/sample-yard.png" alt=""></div>
           </div>
         </div>
       </div>
@@ -720,6 +785,13 @@
   document.addEventListener('DOMContentLoaded', function() {
     initSlider('vs-slider', 'vs-before-wrap', 'vs-handle');
     initSlider('reno-slider', 'reno-before-wrap', 'reno-handle');
+
+    // Post-publish state: swap immersive media card + show success toast
+    if (window.location.search.indexOf('published=true') !== -1) {
+      document.getElementById('immersive-card-setup').style.display = 'none';
+      document.getElementById('immersive-card-ready').style.display = 'flex';
+      document.getElementById('upload-toast').style.display = 'flex';
+    }
   });
 })();
 </script>
