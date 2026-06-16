@@ -552,8 +552,10 @@
             <p class="card-desc">You've added your featured photos. Promote this listing with Spotlight Listings to activate the immersive experience.</p>
           </div>
           <div style="display:flex; gap:16px; align-items:center;">
-            <button class="btn-secondary" style="padding:16px 24px; font-size:16px; font-weight:700;" onclick="window.location.href='immersive-media-upload.html'">Edit photos</button>
-            <button class="btn-secondary" style="padding:16px 24px; font-size:16px; font-weight:700;" onclick="openPreview()">Preview</button>
+            <button class="btn-secondary" style="display:flex; gap:8px; align-items:center; padding:16px 24px; font-size:16px; font-weight:700;" onclick="openPreview()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4052a2" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              Preview
+            </button>
             <button class="btn-primary" style="display:flex; gap:10px; align-items:center;">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13l1-8z"/></svg>
               Promote listing
@@ -563,13 +565,14 @@
         <div class="divider"></div>
         <div style="display:flex; flex-direction:column; gap:8px;">
           <p class="card-desc">Featured photos</p>
-          <div style="display:flex; gap:8px;">
+          <div style="display:flex; gap:8px; align-items:center;">
             <div class="featured-thumb"><img src="assets/sample-bedroom.png" alt=""></div>
             <div class="featured-thumb"><img src="assets/sample-kitchen.png" alt=""></div>
             <div class="featured-thumb"><img src="assets/sample-living-room.png" alt=""></div>
             <div class="featured-thumb"><img src="assets/sample-bathroom.png" alt=""></div>
             <div class="featured-thumb"><img src="assets/sample-front-of-house.png" alt=""></div>
             <div class="featured-thumb"><img src="assets/sample-yard.png" alt=""></div>
+            <a class="task-link" style="margin-left:16px;" onclick="window.location.href='immersive-media-upload.html'">Edit photos</a>
           </div>
         </div>
       </div>
