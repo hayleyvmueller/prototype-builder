@@ -363,6 +363,26 @@
   .modal-card-desc { font-size: 14px; color: #616f86; line-height: 20px; }
   .modal-footer { display: flex; justify-content: flex-end; }
 
+  /* ── Modal info list ──────────────────────────────────── */
+  .modal-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f4f5fb;
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+  .modal-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: #48566c;
+    line-height: 20px;
+  }
+  .modal-info-item svg { flex-shrink: 0; margin-top: 1px; }
+  .modal-info-item strong { color: #181c24; font-weight: 600; }
+
   /* ── Featured photo thumbnails (ready state) ─────────── */
   .featured-thumb { width: 76px; height: 51px; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
   .featured-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -831,8 +851,25 @@
     <img class="modal-close" src="https://www.figma.com/api/mcp/asset/c7fb419d-b31a-4dce-94b3-adacba83e1a8" alt="Close" onclick="document.getElementById('immersive-modal').classList.remove('open')">
     <div class="modal-header">
       <div class="modal-title">Immersive media</div>
-      <p class="modal-desc">By uploading your preferred photos, you'll be getting....</p>
+      <p class="modal-desc">Upload your selected photos to unlock AI-enhanced views that give buyers a richer way to explore this home.</p>
     </div>
+
+    <!-- Info callouts -->
+    <div class="modal-info-list">
+      <div class="modal-info-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#4052a2" stroke-width="1.4"/><path d="M8 7v5" stroke="#4052a2" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5" r="0.75" fill="#4052a2"/></svg>
+        <span><strong>Your listing photos won't be affected.</strong> The photos you upload here are used only for the immersive media experience — your existing MLS listing photos stay exactly as they are.</span>
+      </div>
+      <div class="modal-info-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#4052a2" stroke-width="1.4"/><path d="M8 7v5" stroke="#4052a2" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5" r="0.75" fill="#4052a2"/></svg>
+        <span><strong>We'll need your permission.</strong> To enhance your photos, you'll confirm you're the copyright owner or authorized licensee. You retain full ownership and can revoke permission at any time.</span>
+      </div>
+      <div class="modal-info-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#4052a2" stroke-width="1.4"/><path d="M8 7v5" stroke="#4052a2" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5" r="0.75" fill="#4052a2"/></svg>
+        <span><strong>Promote your listing to go live.</strong> After uploading and granting permission, you'll need to promote this listing with a Spotlight Listing to activate the immersive experience for buyers.</span>
+      </div>
+    </div>
+
     <div class="modal-cards">
       <!-- AI walkthroughs -->
       <div class="modal-card">
