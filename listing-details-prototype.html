@@ -320,7 +320,8 @@
     background: white;
     border-radius: 16px;
     padding: 40px;
-    width: 789px;
+    /* 3 cards × 248px + 2 gaps × 16px + 2 × 40px padding = 896px */
+    width: 896px;
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -336,14 +337,15 @@
     opacity: 0.6;
   }
   .modal-close:hover { opacity: 1; }
+  .modal-header { display: flex; flex-direction: column; gap: 8px; }
   .modal-title { font-size: 24px; font-weight: 600; color: #181c24; line-height: 32px; }
-  .modal-desc { font-size: 16px; color: #616f86; line-height: 24px; margin-top: -16px; }
+  .modal-desc { font-size: 16px; color: #616f86; line-height: 24px; }
   .modal-cards { display: flex; gap: 16px; }
   .modal-card {
     background: white;
     border-radius: 16px;
     box-shadow: 0 4px 4px rgba(0,0,0,0.12);
-    width: 236px;
+    width: 248px;
     flex-shrink: 0;
     overflow: hidden;
     display: flex;
@@ -356,31 +358,6 @@
     position: relative;
   }
   .modal-card-media img { width: 100%; height: 100%; object-fit: cover; }
-  .modal-card-slider {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 2px rgba(0,0,0,0.25);
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-  }
-  .modal-card-slider svg { width: 10px; height: 10px; }
-  .modal-card-slider-line {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 2px;
-    height: 100%;
-    background: rgba(255,255,255,0.8);
-    pointer-events: none;
-  }
   .modal-card-body { padding: 16px; display: flex; flex-direction: column; gap: 4px; }
   .modal-card-title { font-size: 16px; font-weight: 500; color: #181c24; line-height: 24px; }
   .modal-card-desc { font-size: 14px; color: #616f86; line-height: 20px; }
@@ -751,9 +728,9 @@
 <div class="modal-overlay" id="immersive-modal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal">
     <img class="modal-close" src="https://www.figma.com/api/mcp/asset/c7fb419d-b31a-4dce-94b3-adacba83e1a8" alt="Close" onclick="document.getElementById('immersive-modal').classList.remove('open')">
-    <div>
+    <div class="modal-header">
       <div class="modal-title">Immersive media</div>
-      <p class="modal-desc" style="margin-top:8px;">By uploading your preferred photos, you'll be getting....</p>
+      <p class="modal-desc">By uploading your preferred photos, you'll be getting....</p>
     </div>
     <div class="modal-cards">
       <!-- AI walkthroughs -->
