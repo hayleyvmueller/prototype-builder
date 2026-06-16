@@ -303,6 +303,88 @@
   .detail-text { font-size: 16px; color: #616f86; line-height: 24px; }
   .detail-link { font-size: 16px; color: #4052a2; text-decoration: underline; line-height: 24px; }
   .show-more { font-size: 16px; font-weight: 500; color: #4052a2; text-decoration: underline; cursor: pointer; }
+
+  /* ── Modal overlay ────────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.54);
+    z-index: 100;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 71px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    width: 789px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    top: 24px;
+    right: 40px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    opacity: 0.6;
+  }
+  .modal-close:hover { opacity: 1; }
+  .modal-title { font-size: 24px; font-weight: 600; color: #181c24; line-height: 32px; }
+  .modal-desc { font-size: 16px; color: #616f86; line-height: 24px; margin-top: -16px; }
+  .modal-cards { display: flex; gap: 16px; }
+  .modal-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 4px rgba(0,0,0,0.12);
+    width: 236px;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-card-media {
+    width: 100%;
+    height: 155px;
+    overflow: hidden;
+    position: relative;
+  }
+  .modal-card-media img { width: 100%; height: 100%; object-fit: cover; }
+  .modal-card-slider {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 2px rgba(0,0,0,0.25);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+  .modal-card-slider svg { width: 10px; height: 10px; }
+  .modal-card-slider-line {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: rgba(255,255,255,0.8);
+    pointer-events: none;
+  }
+  .modal-card-body { padding: 16px; display: flex; flex-direction: column; gap: 4px; }
+  .modal-card-title { font-size: 16px; font-weight: 500; color: #181c24; line-height: 24px; }
+  .modal-card-desc { font-size: 14px; color: #616f86; line-height: 20px; }
+  .modal-footer { display: flex; justify-content: flex-end; }
 </style>
 </head>
 <body>
@@ -400,7 +482,7 @@
             </div>
             <p class="card-desc">Upload your selected photos to activate AI-enhanced rendering and views that give buyers a richer way to explore the home.</p>
           </div>
-          <button class="btn-primary">Set up immersive media</button>
+          <button class="btn-primary" onclick="document.getElementById('immersive-modal').classList.add('open')">Set up immersive media</button>
         </div>
         <div class="divider"></div>
         <div class="feature-list">
@@ -610,6 +692,60 @@
     </div><!-- /content-inner -->
   </main>
 </div><!-- /layout -->
+
+<!-- Immersive media modal -->
+<div class="modal-overlay" id="immersive-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <img class="modal-close" src="https://www.figma.com/api/mcp/asset/c7fb419d-b31a-4dce-94b3-adacba83e1a8" alt="Close" onclick="document.getElementById('immersive-modal').classList.remove('open')">
+    <div>
+      <div class="modal-title">Immersive media</div>
+      <p class="modal-desc" style="margin-top:8px;">By uploading your preferred photos, you'll be getting....</p>
+    </div>
+    <div class="modal-cards">
+      <!-- AI walkthroughs -->
+      <div class="modal-card">
+        <div class="modal-card-media">
+          <img src="https://www.figma.com/api/mcp/asset/4fbdbd18-a286-4360-b196-a9fef87c1003" alt="AI walkthroughs">
+        </div>
+        <div class="modal-card-body">
+          <div class="modal-card-title">AI walkthroughs</div>
+          <div class="modal-card-desc">Show your buyers a more immersive view of the home</div>
+        </div>
+      </div>
+      <!-- Virtual staging -->
+      <div class="modal-card">
+        <div class="modal-card-media">
+          <img src="https://www.figma.com/api/mcp/asset/4fbdbd18-a286-4360-b196-a9fef87c1003" alt="Virtual staging">
+          <div class="modal-card-slider-line"></div>
+          <div class="modal-card-slider">
+            <svg viewBox="0 0 10 10" fill="none"><path d="M4 2L2 5l2 3" stroke="#181c24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 2l2 3-2 3" stroke="#181c24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <div class="modal-card-body">
+          <div class="modal-card-title">Virtual staging</div>
+          <div class="modal-card-desc">Show your buyers a more immersive view of the home</div>
+        </div>
+      </div>
+      <!-- Home renovations -->
+      <div class="modal-card">
+        <div class="modal-card-media">
+          <img src="https://www.figma.com/api/mcp/asset/4fbdbd18-a286-4360-b196-a9fef87c1003" alt="Home renovations">
+          <div class="modal-card-slider-line"></div>
+          <div class="modal-card-slider">
+            <svg viewBox="0 0 10 10" fill="none"><path d="M4 2L2 5l2 3" stroke="#181c24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 2l2 3-2 3" stroke="#181c24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <div class="modal-card-body">
+          <div class="modal-card-title">Home renovations</div>
+          <div class="modal-card-desc">Show your buyers a more immersive view of the home</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="document.getElementById('immersive-modal').classList.remove('open')">Upload photos</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
