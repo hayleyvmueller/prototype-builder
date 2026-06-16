@@ -716,10 +716,10 @@
 
 <script>
 (function() {
-  function initSlider() {
-    const slider = document.getElementById('vs-slider');
-    const beforeWrap = document.getElementById('vs-before-wrap');
-    const handle = document.getElementById('vs-handle');
+  function initSlider(sliderId, beforeWrapId, handleId) {
+    const slider = document.getElementById(sliderId);
+    const beforeWrap = document.getElementById(beforeWrapId);
+    const handle = document.getElementById(handleId);
     if (!slider) return;
 
     let dragging = false;
@@ -740,10 +740,9 @@
     window.addEventListener('touchend', function() { dragging = false; });
   }
 
-  // Init after modal is first opened
   document.addEventListener('DOMContentLoaded', function() {
-    document.querySelector('[onclick*="immersive-modal"]') && initSlider();
-    initSlider();
+    initSlider('vs-slider', 'vs-before-wrap', 'vs-handle');
+    initSlider('reno-slider', 'reno-before-wrap', 'reno-handle');
   });
 })();
 </script>
@@ -792,13 +791,21 @@
           <div class="modal-card-desc">Show your buyers a more immersive view of the home</div>
         </div>
       </div>
-      <!-- Home renovations -->
+      <!-- Home renovations — before/after drag slider -->
       <div class="modal-card">
-        <div class="modal-card-media">
-          <img src="https://www.figma.com/api/mcp/asset/4fbdbd18-a286-4360-b196-a9fef87c1003" alt="Home renovations">
-          <div class="modal-card-slider-line"></div>
-          <div class="modal-card-slider">
-            <svg viewBox="0 0 10 10" fill="none"><path d="M4 2L2 5l2 3" stroke="#181c24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 2l2 3-2 3" stroke="#181c24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="modal-card-media vs-slider" id="reno-slider">
+          <img class="vs-after" src="assets/reno-after.png" alt="Renovated bathroom">
+          <div class="vs-before-wrap" id="reno-before-wrap">
+            <img class="vs-before" src="assets/reno-before.png" alt="Original bathroom">
+          </div>
+          <div class="vs-handle" id="reno-handle">
+            <div class="vs-handle-line"></div>
+            <div class="vs-handle-pill">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M5 4L2 8l3 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M11 4l3 4-3 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
           </div>
         </div>
         <div class="modal-card-body">
