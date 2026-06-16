@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Immersive Media Photos – Upload</title>
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --text-primary: #1a1816;
+    --text-alt: #726a60;
+    --border-base: #d3cfca;
+    --border-secondary: #958a7f;
+    --bg-base: #ffffff;
+    --bg-alt: #f2f0ef;
+    --success: #2a7e3b;
+    --warning-subtle: #fff2d0;
+    --link: #3377cc;
+    --primary: #1a1816;
+  }
+  body {
+    background: #ffffff;
+    font-family: 'Mulish', sans-serif;
+    color: var(--text-primary);
+    min-width: 1440px;
+    padding-bottom: 96px;
+  }
+
+  /* ── Global header ───────────────────────────────────── */
+  .gh {
+    height: 72px;
+    border-bottom: 1px solid var(--border-base);
+    display: flex;
+    align-items: center;
+    padding: 16px 32px;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .gh img { height: 28px; }
+
+  /* ── Page content ────────────────────────────────────── */
+  .page {
+    padding: 40px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .page-title { display: flex; flex-direction: column; gap: 8px; }
+  .page-title h1 { font-size: 32px; font-weight: 700; line-height: 40px; letter-spacing: -0.24px; }
+  .page-title p { font-size: 16px; font-weight: 400; line-height: 24px; }
+
+  .panel {
+    background: white;
+    border: 1px solid var(--border-base);
+    border-radius: 12px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .panel-inner { display: flex; flex-direction: column; gap: 32px; }
+
+  /* ── Inline message (optimize) ───────────────────────── */
+  .inline-bubble {
+    background: var(--bg-alt);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .inline-bubble .icon { width: 24px; height: 24px; flex-shrink: 0; }
+  .inline-bubble .content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .inline-bubble .content .t1 { font-size: 16px; font-weight: 700; line-height: 24px; }
+  .inline-bubble .content .t2 { font-size: 16px; font-weight: 400; line-height: 24px; }
+
+  .toggle {
+    background: var(--success);
+    border-radius: 40px;
+    height: 36px;
+    width: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px 4px 4px 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .toggle .label { color: white; font-size: 16px; font-weight: 500; }
+  .toggle .knob { width: 28px; height: 28px; border-radius: 50%; background: white; }
+  .toggle.off { background: var(--border-secondary); flex-direction: row-reverse; padding: 4px 12px 4px 4px; }
+
+  /* ── Dropzone ────────────────────────────────────────── */
+  .dropzone {
+    background: var(--bg-base);
+    border: 2px dashed var(--border-base);
+    border-radius: 8px;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .dropzone.dragover { border-color: var(--primary); background: var(--bg-alt); }
+  .dropzone .up-icon { width: 24px; height: 24px; margin-bottom: 8px; }
+  .dropzone .dz-main { font-size: 16px; line-height: 24px; }
+  .dropzone .dz-main .browse { font-weight: 600; text-decoration: underline; }
+  .dropzone .dz-sub { font-size: 16px; color: var(--text-alt); line-height: 24px; margin-top: 4px; }
+
+  /* ── Photo grid ──────────────────────────────────────── */
+  .photo-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .grid-item {
+    width: 200px;
+    height: 133px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+  .grid-item img { width: 100%; height: 100%; object-fit: cover; }
+  .grid-item .del {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    background: rgba(26,24,22,0.72);
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+  }
+  .grid-item .del svg { width: 20px; height: 20px; }
+  .grid-item .tag {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--primary);
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+    padding: 4px 8px;
+    border-radius: 40px;
+  }
+
+  /* ── Photo count footer ──────────────────────────────── */
+  .photo-count { display: flex; flex-direction: column; gap: 8px; }
+  .photo-count .pc1 { font-size: 14px; line-height: 20px; }
+  .photo-count .pc2 { font-size: 12px; line-height: 16px; }
+
+  /* ── Fixed bottom bar ────────────────────────────────── */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    box-shadow: 0px 8px 12px rgba(0,0,0,0.16), 0px 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 16px 32px;
+    z-index: 20;
+  }
+  .btn {
+    height: 48px;
+    border-radius: 40px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'Mulish', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--primary);
+  }
+  .btn-secondary { background: white; color: var(--primary); }
+  .btn-secondary:hover { background: var(--bg-alt); }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: #3f3b36; }
+  .btn-primary:disabled, .btn.disabled {
+    background: #e9e7e4;
+    border-color: var(--border-secondary);
+    color: var(--border-secondary);
+    cursor: not-allowed;
+  }
+  .btn-link {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 12px 0;
+    font-family: 'Mulish', sans-serif;
+  }
+
+  /* ── Modal ───────────────────────────────────────────── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,24,22,0.72);
+    z-index: 100;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 32px 32px;
+    overflow-y: auto;
+  }
+  .overlay.open { display: flex; }
+  .dialog {
+    background: white;
+    border-radius: 16px;
+    width: 728px;
+    box-shadow: 0px 4px 16px rgba(0,0,0,0.16);
+    overflow: hidden;
+  }
+  .dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 24px;
+  }
+  .dialog-header h2 { font-size: 24px; font-weight: 600; line-height: 28px; letter-spacing: -0.24px; }
+  .dialog-close { background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0; }
+  .dialog-close svg { width: 16px; height: 16px; display: block; }
+  .dialog-body { padding: 0 24px; display: flex; flex-direction: column; gap: 24px; }
+  .dialog-body > .intro { font-size: 18px; line-height: 28px; font-weight: 400; }
+  .tc-box {
+    background: var(--bg-alt);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .tc-box h3 { font-size: 16px; font-weight: 700; line-height: 24px; }
+  .tc-box p { font-size: 18px; line-height: 28px; font-weight: 400; }
+  .tc-box p .bold { font-weight: 600; }
+  .tc-box a { color: var(--link); font-weight: 500; text-decoration: underline; }
+
+  .check-row {
+    border: 1px solid var(--border-base);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    cursor: pointer;
+  }
+  .check-row .box {
+    width: 16px;
+    height: 16px;
+    margin-top: 6px;
+    border: 1px solid var(--border-secondary);
+    border-radius: 4px;
+    background: white;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .check-row.checked .box { background: var(--primary); border-color: var(--primary); }
+  .check-row.checked .box svg { display: block; }
+  .check-row .box svg { display: none; width: 12px; height: 12px; }
+  .check-row .label { font-size: 18px; font-weight: 500; line-height: 28px; }
+
+  .warn-bubble {
+    background: var(--warning-subtle);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .warn-bubble svg { width: 24px; height: 24px; flex-shrink: 0; }
+  .warn-bubble p { font-size: 16px; line-height: 24px; }
+
+  .dialog-footer {
+    display: flex;
+    gap: 24px;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 24px;
+  }
+
+  /* ── Publishing modal ────────────────────────────────── */
+  .publish-dialog {
+    background: white;
+    border-radius: 16px;
+    width: 480px;
+    box-shadow: 0px 4px 16px rgba(0,0,0,0.16);
+    overflow: hidden;
+  }
+  .publish-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+  }
+  .publish-header h2 { font-size: 24px; font-weight: 600; line-height: 28px; }
+  .publish-body { padding: 0 24px 32px; display: flex; flex-direction: column; gap: 24px; }
+  .publish-preview {
+    width: 100%;
+    height: 220px;
+    border-radius: 8px;
+    background: var(--bg-alt);
+    overflow: hidden;
+  }
+  .publish-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .publish-status { font-size: 16px; font-weight: 500; }
+  .progress-track { background: var(--bg-alt); border-radius: 40px; height: 8px; overflow: hidden; }
+  .progress-fill { height: 8px; background: var(--success); border-radius: 40px; width: 0%; transition: width 0.4s ease; }
+</style>
+</head>
+<body>
+
+<!-- Global header -->
+<div class="gh">
+  <img src="assets/realtor-pro-lockup.png" alt="realtor.com PRO">
+</div>
+
+<!-- Page content -->
+<div class="page">
+  <div class="page-title">
+    <h1>Immersive media photos</h1>
+    <p>Copy about uploading photos and what is needed.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-inner">
+      <!-- Optimize toggle -->
+      <div class="inline-bubble">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#1a1816" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M15 9h0M17.8 6.2L19 5M3 21l9-9M12.2 6.2L11 5"/>
+        </svg>
+        <div class="content">
+          <div class="t1">Automatically optimize my photos</div>
+          <div class="t2">Conservative enhancements only (lighting, color, geometry). ON by default.</div>
+        </div>
+        <div class="toggle" id="optimize-toggle" onclick="toggleOptimize()">
+          <span class="label">On</span>
+          <span class="knob"></span>
+        </div>
+      </div>
+
+      <!-- Dropzone -->
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+        <svg class="up-icon" viewBox="0 0 24 24" fill="none" stroke="#1a1816" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 16V4M7 9l5-5 5 5M5 20h14"/>
+        </svg>
+        <div class="dz-main">Drag and drop your file(s) here or <span class="browse">browse files</span></div>
+        <div class="dz-sub">JPG, PNG, HEIC | Max 20MB | Min 1,000px</div>
+      </div>
+      <input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
+
+      <!-- Photo grid -->
+      <div class="photo-grid" id="photo-grid"></div>
+    </div>
+
+    <!-- Photo count -->
+    <div class="photo-count">
+      <div class="pc1" id="photo-count-label">Photos (0)</div>
+      <div class="pc2">Minimum 5 photos required for custom photos</div>
+    </div>
+  </div>
+</div>
+
+<!-- Fixed bottom bar -->
+<div class="bottom-bar">
+  <button class="btn btn-secondary" onclick="window.location.href='listing-details-prototype.html'">Cancel</button>
+  <button class="btn btn-primary disabled" id="publish-btn" onclick="openConfirm()">Publish</button>
+</div>
+
+<!-- Confirm / T&C modal -->
+<div class="overlay" id="confirm-overlay">
+  <div class="dialog">
+    <div class="dialog-header">
+      <h2>Allow Realtor.com to enhance your photos</h2>
+      <button class="dialog-close" onclick="closeConfirm()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#1a1816" stroke-width="1.5" stroke-linecap="round"><path d="M2 2l12 12M14 2L2 14"/></svg>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <p class="intro">To publish your custom photos with immersive media, we need to ensure you are the copyright owner or authorized licensee of your photos.</p>
+      <div class="tc-box">
+        <h3>Terms &amp; Conditions</h3>
+        <p>By accepting, you grant Realtor.com a non-exclusive, worldwide, royalty free license to use, reproduce, display, and create derivative works of the photos you upload <span class="bold">solely to produce and display enhanced media on your Spotlight Listing detail page.</span></p>
+        <p>You retain full ownership of your original photos. You may revoke this permission at any time from your listing edit page. Full terms available in our <a href="#">Photo License Agreement.</a></p>
+      </div>
+      <div class="check-row" id="check-row" onclick="toggleCheck()">
+        <div class="box">
+          <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-6"/></svg>
+        </div>
+        <div class="label">I confirm that I am the copyright owner or authorized licensee of all photos I am uploading.</div>
+      </div>
+      <div class="warn-bubble">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l9 16H3L12 3z" fill="#f5a623"/><path d="M12 9v5M12 16.5v.5" stroke="#1a1816" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <p>If you deny permission, your photos will not be uploaded.</p>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn-link" onclick="denyPermission()">Deny permission</button>
+      <button class="btn btn-primary disabled" id="accept-btn" onclick="acceptAndPublish()">Accept &amp; publish</button>
+    </div>
+  </div>
+</div>
+
+<!-- Publishing modal -->
+<div class="overlay" id="publish-overlay">
+  <div class="publish-dialog">
+    <div class="publish-header">
+      <h2>Publishing photos</h2>
+    </div>
+    <div class="publish-body">
+      <div class="publish-preview"><img id="publish-preview-img" src="" alt=""></div>
+      <div>
+        <div class="publish-status" id="publish-status">Uploading photo 1 of 6</div>
+        <div class="progress-track" style="margin-top:12px;"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Sample photos that "upload" — using the project's preview photos
+  var SAMPLE_PHOTOS = [
+    'assets/sample-bedroom.png',
+    'assets/sample-kitchen.png',
+    'assets/sample-living-room.png',
+    'assets/sample-bathroom.png',
+    'assets/sample-front-of-house.png',
+    'assets/sample-yard.png'
+  ];
+
+  var photos = [];
+  var optimizeOn = true;
+  var confirmed = false;
+
+  function toggleOptimize() {
+    optimizeOn = !optimizeOn;
+    var t = document.getElementById('optimize-toggle');
+    t.classList.toggle('off', !optimizeOn);
+    t.querySelector('.label').textContent = optimizeOn ? 'On' : 'Off';
+  }
+
+  function renderGrid() {
+    var grid = document.getElementById('photo-grid');
+    grid.innerHTML = '';
+    photos.forEach(function(src, i) {
+      var item = document.createElement('div');
+      item.className = 'grid-item';
+      item.innerHTML =
+        '<img src="' + src + '" alt="">' +
+        (i === 0 ? '<span class="tag">Featured</span>' : '') +
+        '<button class="del" onclick="removePhoto(' + i + ')">' +
+          '<svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M3 5h14M8 5V3h4v2M5 5l1 12h8l1-12"/></svg>' +
+        '</button>';
+      grid.appendChild(item);
+    });
+    document.getElementById('photo-count-label').textContent = 'Photos (' + photos.length + ')';
+    // Publish enabled at 5+ photos
+    var pubBtn = document.getElementById('publish-btn');
+    pubBtn.classList.toggle('disabled', photos.length < 5);
+  }
+
+  function handleFiles(fileList) {
+    // For the prototype, ignore the actual file bytes and add sample photos
+    var count = fileList && fileList.length ? fileList.length : 1;
+    for (var i = 0; i < count; i++) {
+      photos.push(SAMPLE_PHOTOS[photos.length % SAMPLE_PHOTOS.length]);
+    }
+    // If user only picked 1-2, top up to the 6-photo demo set on first add
+    if (photos.length < 5) {
+      while (photos.length < 6) {
+        photos.push(SAMPLE_PHOTOS[photos.length % SAMPLE_PHOTOS.length]);
+      }
+    }
+    renderGrid();
+  }
+
+  function removePhoto(i) {
+    photos.splice(i, 1);
+    renderGrid();
+  }
+
+  // Drag & drop
+  var dz = document.getElementById('dropzone');
+  dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', function() { dz.classList.remove('dragover'); });
+  dz.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  // Confirm modal
+  function openConfirm() {
+    if (photos.length < 5) return;
+    document.getElementById('confirm-overlay').classList.add('open');
+  }
+  function closeConfirm() {
+    document.getElementById('confirm-overlay').classList.remove('open');
+  }
+  function toggleCheck() {
+    confirmed = !confirmed;
+    document.getElementById('check-row').classList.toggle('checked', confirmed);
+    document.getElementById('accept-btn').classList.toggle('disabled', !confirmed);
+  }
+  function denyPermission() {
+    closeConfirm();
+  }
+
+  // Publishing flow
+  function acceptAndPublish() {
+    if (!confirmed) return;
+    closeConfirm();
+    startPublishing();
+  }
+
+  function startPublishing() {
+    var overlay = document.getElementById('publish-overlay');
+    overlay.classList.add('open');
+    var total = photos.length;
+    var i = 0;
+
+    function step() {
+      if (i >= total) {
+        document.getElementById('publish-status').textContent = 'Done!';
+        document.getElementById('progress-fill').style.width = '100%';
+        setTimeout(function() {
+          window.location.href = 'listing-details-prototype.html';
+        }, 900);
+        return;
+      }
+      document.getElementById('publish-preview-img').src = photos[i];
+      document.getElementById('publish-status').textContent = 'Uploading photo ' + (i + 1) + ' of ' + total;
+      document.getElementById('progress-fill').style.width = (((i + 1) / total) * 100) + '%';
+      i++;
+      setTimeout(step, 1100);
+    }
+    step();
+  }
+</script>
+
+</body>
+</html>
