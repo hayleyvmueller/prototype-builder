@@ -716,29 +716,29 @@
 
 <script>
 (function() {
+  var activeSlider = null;
+
   function initSlider(sliderId, beforeWrapId, handleId) {
-    const slider = document.getElementById(sliderId);
-    const beforeWrap = document.getElementById(beforeWrapId);
-    const handle = document.getElementById(handleId);
+    var slider = document.getElementById(sliderId);
+    var beforeWrap = document.getElementById(beforeWrapId);
+    var handle = document.getElementById(handleId);
     if (!slider) return;
 
-    let dragging = false;
-
     function setPosition(x) {
-      const rect = slider.getBoundingClientRect();
-      let pct = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
-      const px = pct * 100;
-      beforeWrap.style.width = px + '%';
-      handle.style.left = px + '%';
+      var rect = slider.getBoundingClientRect();
+      var pct = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+      beforeWrap.style.width = (pct * 100) + '%';
+      handle.style.left = (pct * 100) + '%';
     }
 
-    slider.addEventListener('mousedown', function(e) { dragging = true; setPosition(e.clientX); e.preventDefault(); });
-    slider.addEventListener('touchstart', function(e) { dragging = true; setPosition(e.touches[0].clientX); }, { passive: true });
-    window.addEventListener('mousemove', function(e) { if (dragging) setPosition(e.clientX); });
-    window.addEventListener('touchmove', function(e) { if (dragging) setPosition(e.touches[0].clientX); }, { passive: true });
-    window.addEventListener('mouseup', function() { dragging = false; });
-    window.addEventListener('touchend', function() { dragging = false; });
+    slider.addEventListener('mousedown', function(e) { activeSlider = { set: setPosition }; setPosition(e.clientX); e.preventDefault(); });
+    slider.addEventListener('touchstart', function(e) { activeSlider = { set: setPosition }; setPosition(e.touches[0].clientX); }, { passive: true });
   }
+
+  window.addEventListener('mousemove', function(e) { if (activeSlider) activeSlider.set(e.clientX); });
+  window.addEventListener('touchmove', function(e) { if (activeSlider) activeSlider.set(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('mouseup', function() { activeSlider = null; });
+  window.addEventListener('touchend', function() { activeSlider = null; });
 
   document.addEventListener('DOMContentLoaded', function() {
     initSlider('vs-slider', 'vs-before-wrap', 'vs-handle');
