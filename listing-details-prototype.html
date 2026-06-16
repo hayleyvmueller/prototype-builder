@@ -553,6 +553,7 @@
           </div>
           <div style="display:flex; gap:16px; align-items:center;">
             <button class="btn-secondary" style="padding:16px 24px; font-size:16px; font-weight:700;" onclick="window.location.href='immersive-media-upload.html'">Edit photos</button>
+            <button class="btn-secondary" style="padding:16px 24px; font-size:16px; font-weight:700;" onclick="openPreview()">Preview</button>
             <button class="btn-primary" style="display:flex; gap:10px; align-items:center;">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13l1-8z"/></svg>
               Promote listing
@@ -781,6 +782,24 @@
   window.addEventListener('touchmove', function(e) { if (activeSlider) activeSlider.set(e.touches[0].clientX); }, { passive: true });
   window.addEventListener('mouseup', function() { activeSlider = null; });
   window.addEventListener('touchend', function() { activeSlider = null; });
+
+  // Open the Spotlight preview with this listing's info
+  window.openPreview = function() {
+    var origin = window.location.href.replace(/\/[^\/]*(\?.*)?$/, '');
+    var photoFiles = [
+      'sample-bedroom.png', 'sample-kitchen.png', 'sample-living-room.png',
+      'sample-bathroom.png', 'sample-front-of-house.png', 'sample-yard.png'
+    ];
+    window.__previewData = {
+      street: '123 Main Street', city: 'Austin', state: 'TX', zip: '78701',
+      price: 365000, beds: 3, baths: 2.5, sqft: 1870, lotSqft: 2794,
+      yearBuilt: 2007, propertyType: 'single-family', daysOnSite: 9,
+      features: ['Hardwood floors', 'Open kitchen', 'Backyard', 'Modern', 'Central AC', 'Garage'],
+      agentName: 'Kelly', brokerage: 'Keller Williams',
+      photos: photoFiles.map(function(f) { return { url: origin + '/assets/' + f }; })
+    };
+    window.open('spotlight-preview/preview.html', '_blank');
+  };
 
   document.addEventListener('DOMContentLoaded', function() {
     initSlider('vs-slider', 'vs-before-wrap', 'vs-handle');
