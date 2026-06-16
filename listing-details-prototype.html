@@ -385,6 +385,27 @@
   .modal-card-title { font-size: 16px; font-weight: 500; color: #181c24; line-height: 24px; }
   .modal-card-desc { font-size: 14px; color: #616f86; line-height: 20px; }
   .modal-footer { display: flex; justify-content: flex-end; }
+
+  /* ── Before/after slider ──────────────────────────────── */
+  .vs-slider { position: relative; overflow: hidden; cursor: col-resize; user-select: none; }
+  .vs-after { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .vs-before-wrap { position: absolute; inset: 0; overflow: hidden; width: 50%; }
+  .vs-before { width: 236px; height: 155px; object-fit: cover; display: block; }
+  .vs-handle { position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+  .vs-handle-line { width: 2px; flex: 1; background: white; opacity: 0.9; }
+  .vs-handle-pill {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #4052a2;
+    border-radius: 100px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
 </style>
 </head>
 <body>
@@ -693,6 +714,40 @@
   </main>
 </div><!-- /layout -->
 
+<script>
+(function() {
+  function initSlider() {
+    const slider = document.getElementById('vs-slider');
+    const beforeWrap = document.getElementById('vs-before-wrap');
+    const handle = document.getElementById('vs-handle');
+    if (!slider) return;
+
+    let dragging = false;
+
+    function setPosition(x) {
+      const rect = slider.getBoundingClientRect();
+      let pct = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+      const px = pct * 100;
+      beforeWrap.style.width = px + '%';
+      handle.style.left = px + '%';
+    }
+
+    slider.addEventListener('mousedown', function(e) { dragging = true; setPosition(e.clientX); e.preventDefault(); });
+    slider.addEventListener('touchstart', function(e) { dragging = true; setPosition(e.touches[0].clientX); }, { passive: true });
+    window.addEventListener('mousemove', function(e) { if (dragging) setPosition(e.clientX); });
+    window.addEventListener('touchmove', function(e) { if (dragging) setPosition(e.touches[0].clientX); }, { passive: true });
+    window.addEventListener('mouseup', function() { dragging = false; });
+    window.addEventListener('touchend', function() { dragging = false; });
+  }
+
+  // Init after modal is first opened
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('[onclick*="immersive-modal"]') && initSlider();
+    initSlider();
+  });
+})();
+</script>
+
 <!-- Immersive media modal -->
 <div class="modal-overlay" id="immersive-modal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal">
@@ -712,13 +767,24 @@
           <div class="modal-card-desc">Show your buyers a more immersive view of the home</div>
         </div>
       </div>
-      <!-- Virtual staging -->
+      <!-- Virtual staging — before/after drag slider -->
       <div class="modal-card">
-        <div class="modal-card-media">
-          <img src="https://www.figma.com/api/mcp/asset/4fbdbd18-a286-4360-b196-a9fef87c1003" alt="Virtual staging">
-          <div class="modal-card-slider-line"></div>
-          <div class="modal-card-slider">
-            <svg viewBox="0 0 10 10" fill="none"><path d="M4 2L2 5l2 3" stroke="#181c24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 2l2 3-2 3" stroke="#181c24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="modal-card-media vs-slider" id="vs-slider">
+          <!-- "After" layer (furnished) sits behind, full width -->
+          <img class="vs-after" src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=480&q=80" alt="Furnished room">
+          <!-- "Before" layer (empty) clips from left to slider position -->
+          <div class="vs-before-wrap" id="vs-before-wrap">
+            <img class="vs-before" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=480&q=80" alt="Empty room">
+          </div>
+          <!-- Drag handle -->
+          <div class="vs-handle" id="vs-handle">
+            <div class="vs-handle-line"></div>
+            <div class="vs-handle-pill">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M5 4L2 8l3 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M11 4l3 4-3 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
           </div>
         </div>
         <div class="modal-card-body">
