@@ -17,7 +17,11 @@ function fmtPrice(n) {
   if (n >= 1000) return `$${Math.round(n / 1000)}K`;
   return `$${n}`;
 }
-function fmtFull(n) { return `$${Number(n).toLocaleString("en-US")}`; }
+function fmtFull(n) {
+  if (typeof n === "string") return n.startsWith("$") ? n : `$${n}`;
+  return `$${Number(n).toLocaleString("en-US")}`;
+}
+function hasPrice(p) { return p != null && p !== 0 && p !== ""; }
 
 // ── Placeholder card ────────────────────────────────────────────────────────
 function PlaceholderCard({ p }) {
@@ -61,7 +65,7 @@ function PlaceholderCard({ p }) {
 // ── Spotlight (user's listing) card ─────────────────────────────────────────
 function SpotlightCard({ data }) {
   const heroUrl = data && data.photos && data.photos[0] ? data.photos[0].url : "assets/preview-photos/front-of-house.png";
-  const price = data && data.price > 0 ? fmtFull(data.price) : "$—";
+  const price = data && hasPrice(data.price) ? fmtFull(data.price) : "$—";
   const addr = data ? `${data.street || "Your listing"}` : "Your listing";
   const city = data ? `${data.city || "Austin"}, ${data.state || "TX"} ${data.zip || ""}`.trim() : "Austin, TX";
   const beds = data && data.beds > 0 ? data.beds : "—";
