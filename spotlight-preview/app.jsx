@@ -118,10 +118,13 @@ function FormPage({ data, set, onGenerate, onCopyLink, isCopied }) {
   };
   const updatePrice = (e) => {
     const v = e.target.value;
-    // If it's purely numeric, store as number; otherwise store as string for display
-    const numeric = v.replace(/[^0-9]/g, "");
-    const isNumeric = v === numeric;
-    set((d) => ({ ...d, price: v === "" ? 0 : isNumeric ? Number(v) : v }));
+    if (v === "") { set((d) => ({ ...d, price: 0 })); return; }
+    // Strip existing commas to get the raw value
+    const stripped = v.replace(/,/g, "");
+    // If it's purely numeric after stripping, store as a number (auto-commas on display)
+    // If it contains letters/symbols, store as raw string (e.g. "Call for price")
+    const isNumeric = /^[0-9]+$/.test(stripped);
+    set((d) => ({ ...d, price: isNumeric ? Number(stripped) : v }));
   };
 
   const hasPhotos = data.photos.length > 0;
