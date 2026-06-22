@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Multi-Promotion + Immersive Media</title>
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --text-primary: #1a1816;
+    --text-alt: #726a60;
+    --border-base: #d3cfca;
+    --border-secondary: #958a7f;
+    --bg-base: #ffffff;
+    --bg-alt: #f2f0ef;
+    --bg-table-head: #ebe8e5;
+    --success: #2a7e3b;
+    --info-bg: #e8eefb;
+    --info-icon: #2c6ecb;
+    --warn-bg: #fff2d0;
+    --warn-line: #f0d488;
+    --active-bg: #d8f0dd;
+    --active-text: #1d6b2c;
+    --media-bg: #ede7fb;
+    --media-text: #6440b8;
+    --primary: #1a1816;
+  }
+  body { background: #fff; font-family: 'Mulish', sans-serif; color: var(--text-primary); min-width: 1440px; }
+
+  .gh { height: 72px; border-bottom: 1px solid var(--border-base); display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: white; position: sticky; top: 0; z-index: 10; }
+  .gh img { height: 28px; }
+
+  /* mode toggle (prototype control) */
+  .mode-ctl { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-alt); }
+  .mode-ctl .seg { display: flex; background: var(--bg-alt); border-radius: 100px; padding: 3px; }
+  .mode-ctl .seg button { border: none; background: none; font-family: inherit; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 100px; cursor: pointer; color: var(--text-alt); }
+  .mode-ctl .seg button.active { background: var(--primary); color: white; }
+
+  .page { max-width: 1120px; margin: 0 auto; padding: 32px 32px 100px; display: flex; flex-direction: column; gap: 24px; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; color: var(--text-primary); text-decoration: underline; cursor: pointer; background: none; border: none; font-family: inherit; }
+  .page-title { font-size: 36px; font-weight: 800; line-height: 44px; letter-spacing: -0.5px; }
+
+  /* Stepper */
+  .stepper { display: flex; align-items: center; gap: 12px; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text-alt); }
+  .step .num { width: 24px; height: 24px; border-radius: 50%; background: var(--bg-alt); color: var(--text-alt); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .step.active { color: var(--text-primary); }
+  .step.active .num { background: var(--primary); color: white; }
+  .step.done .num { background: var(--success); color: white; }
+  .step-sep { width: 28px; height: 1px; background: var(--border-base); }
+
+  .panel { background: white; border: 1px solid var(--border-base); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+  .panel-title { font-size: 22px; font-weight: 700; line-height: 28px; }
+  .panel-sub { font-size: 13px; color: var(--text-alt); line-height: 18px; margin-top: 2px; }
+
+  .tray-info { background: var(--info-bg); border-radius: 10px; padding: 16px; display: flex; gap: 12px; align-items: flex-start; }
+  .tray-info svg { flex-shrink: 0; margin-top: 1px; }
+  .tray-info .t1 { font-size: 15px; font-weight: 700; line-height: 22px; }
+  .tray-info .t2 { font-size: 15px; font-weight: 400; line-height: 22px; }
+
+  .chip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .chip { display: flex; align-items: center; gap: 12px; border: 1px solid var(--border-base); border-radius: 10px; padding: 10px 12px; }
+  .chip img { width: 52px; height: 40px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+  .chip .chip-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .chip .chip-addr { font-size: 13px; font-weight: 700; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip .chip-city { font-size: 12px; color: var(--text-alt); line-height: 16px; }
+  .chip .chip-x { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0; display: flex; }
+  .chip .chip-remove { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--text-alt); font-size: 13px; font-weight: 600; text-decoration: underline; flex-shrink: 0; font-family: inherit; }
+
+  .tray-actions { display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
+  .more-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; text-decoration: underline; cursor: pointer; background: none; border: none; font-family: inherit; color: var(--text-primary); }
+
+  .btn { height: 44px; border-radius: 40px; padding: 10px 22px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--primary); white-space: nowrap; }
+  .btn-secondary { background: white; color: var(--primary); }
+  .btn-secondary:hover { background: var(--bg-alt); }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: #3f3b36; }
+  .btn-primary:disabled, .btn.disabled { background: #e9e7e4; border-color: var(--border-secondary); color: var(--border-secondary); cursor: not-allowed; }
+  .btn-sm { height: 36px; padding: 6px 16px; font-size: 13px; }
+
+  .search-wrap { position: relative; }
+  .search-wrap svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); }
+  .search-input { width: 100%; height: 48px; border: 1px solid var(--border-secondary); border-radius: 8px; padding: 0 16px 0 46px; font-size: 16px; font-family: inherit; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: var(--bg-table-head); text-align: left; font-size: 13px; font-weight: 700; padding: 12px 16px; white-space: nowrap; }
+  thead th:first-child { border-top-left-radius: 8px; }
+  thead th:last-child { border-top-right-radius: 8px; }
+  .arrows { margin-left: 6px; opacity: 0.5; font-size: 11px; }
+  tbody td { padding: 14px 16px; border-bottom: 1px solid var(--border-base); vertical-align: middle; }
+  tbody tr.selected { background: var(--bg-alt); }
+
+  .cell-listing { display: flex; align-items: center; gap: 12px; }
+  .cell-listing img { width: 56px; height: 42px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+  .cell-addr { font-size: 14px; font-weight: 700; line-height: 18px; }
+  .cell-price { font-size: 12px; color: var(--text-alt); line-height: 16px; margin-top: 2px; }
+  .cell-date { font-size: 14px; line-height: 18px; }
+  .cell-date .ago { font-size: 12px; color: var(--text-alt); }
+  .badge-active { background: var(--active-bg); color: var(--active-text); font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 40px; display: inline-block; }
+
+  /* immersive media status badge */
+  .media-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 40px; }
+  .media-badge.ready { background: var(--media-bg); color: var(--media-text); }
+  .media-badge.generating { background: var(--warn-bg); color: #8a6400; }
+  .media-badge.none { background: var(--bg-alt); color: var(--text-alt); }
+  .media-badge svg { flex-shrink: 0; }
+
+  .cbox { width: 18px; height: 18px; border: 1.5px solid var(--border-secondary); border-radius: 4px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .cbox.checked { background: var(--primary); border-color: var(--primary); }
+  .cbox svg { display: none; }
+  .cbox.checked svg { display: block; }
+  .cbox.disabled { background: var(--bg-alt); border-color: var(--border-base); cursor: not-allowed; }
+
+  .pagination { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding-top: 8px; }
+  .pg { min-width: 36px; height: 36px; border: 1px solid var(--border-base); border-radius: 8px; background: white; font-size: 14px; font-family: inherit; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; }
+  .pg.active { border-color: var(--primary); border-width: 2px; font-weight: 700; }
+
+  /* Enhance step */
+  .enhance-banner { border-radius: 10px; padding: 16px 20px; display: flex; gap: 12px; align-items: flex-start; font-size: 15px; line-height: 22px; }
+  .enhance-banner.soft { background: var(--info-bg); }
+  .enhance-banner.hard { background: var(--warn-bg); border: 1px solid var(--warn-line); }
+  .enhance-banner svg { flex-shrink: 0; margin-top: 1px; }
+  .enhance-banner .bold { font-weight: 800; }
+
+  .enhance-row { display: flex; align-items: center; gap: 16px; border: 1px solid var(--border-base); border-radius: 10px; padding: 16px; }
+  .enhance-row img { width: 72px; height: 54px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+  .enhance-row .er-text { flex: 1; min-width: 0; }
+  .enhance-row .er-addr { font-size: 15px; font-weight: 700; }
+  .enhance-row .er-city { font-size: 13px; color: var(--text-alt); }
+  .enhance-row .er-status { margin-top: 6px; }
+  .enhance-row .er-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+  .skip-link { background: none; border: none; color: var(--text-alt); font-size: 14px; font-weight: 700; text-decoration: underline; cursor: pointer; font-family: inherit; }
+  .enhance-row.skipped { opacity: 0.6; }
+  .enhance-row.added { border-color: var(--media-text); background: #faf8ff; }
+
+  .step-foot { display: flex; justify-content: space-between; align-items: center; }
+  .step-summary { font-size: 14px; color: var(--text-alt); }
+
+  /* Modal */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(26,24,22,0.55); z-index: 100; align-items: center; justify-content: center; padding: 32px; }
+  .overlay.open { display: flex; }
+  .dialog { background: white; border-radius: 16px; width: 600px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); padding: 28px 32px 24px; display: flex; flex-direction: column; gap: 16px; }
+  .dialog.wide { width: 720px; }
+  .dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .dialog-head h2 { font-size: 24px; font-weight: 800; line-height: 30px; letter-spacing: -0.3px; }
+  .dialog-close { background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0; }
+  .dialog-body { font-size: 16px; line-height: 24px; }
+  .dialog-foot { display: flex; justify-content: flex-end; align-items: center; gap: 20px; margin-top: 4px; }
+  .btn-link { background: none; border: none; color: var(--text-primary); font-size: 15px; font-weight: 700; text-decoration: underline; cursor: pointer; font-family: inherit; }
+
+  .summary-split { display: flex; gap: 12px; }
+  .summary-stat { flex: 1; border: 1px solid var(--border-base); border-radius: 10px; padding: 14px 16px; }
+  .summary-stat .n { font-size: 26px; font-weight: 800; }
+  .summary-stat .l { font-size: 13px; color: var(--text-alt); line-height: 17px; margin-top: 2px; }
+  .summary-stat.ready .n { color: var(--media-text); }
+  .summary-stat.missing .n { color: #8a6400; }
+
+  .success-toast { position: fixed; top: 88px; right: 32px; width: 440px; background: var(--success); color: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); display: flex; gap: 12px; align-items: flex-start; padding: 16px; z-index: 200; }
+  .success-toast svg { flex-shrink: 0; margin-top: 1px; }
+  .success-toast p { flex: 1; font-size: 14px; line-height: 20px; }
+  .success-toast .close { background: none; border: none; cursor: pointer; padding: 0; display: flex; color: white; }
+
+  .view { display: none; }
+  .view.show { display: flex; flex-direction: column; gap: 24px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="gh">
+  <img src="assets/realtor-pro-lockup.png" alt="realtor.com PRO">
+  <div class="mode-ctl">
+    <span>Prototype mode:</span>
+    <div class="seg">
+      <button id="mode-soft" class="active" onclick="setMode('soft')">Soft nudge</button>
+      <button id="mode-hard" onclick="setMode('hard')">Hard gate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success toast -->
+<div class="success-toast hidden" id="success-toast">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="white"/><path d="M8 12l2.5 2.5L16 9" stroke="#2a7e3b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <p id="success-toast-text"></p>
+  <button class="close" onclick="this.parentElement.classList.add('hidden')">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg>
+  </button>
+</div>
+
+<div class="page">
+  <button class="back-link" id="top-back" onclick="onBack()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Back
+  </button>
+  <h1 class="page-title">Spotlight Listings</h1>
+
+  <!-- Stepper -->
+  <div class="stepper">
+    <div class="step active" id="st-1"><span class="num">1</span> Select listings</div>
+    <div class="step-sep"></div>
+    <div class="step" id="st-2"><span class="num">2</span> Enhance your listings</div>
+    <div class="step-sep"></div>
+    <div class="step" id="st-3"><span class="num">3</span> Confirm &amp; launch</div>
+  </div>
+
+  <!-- ===== VIEW 1: SELECT ===== -->
+  <div class="view show" id="view-select">
+    <div class="panel" id="tray-panel">
+      <div class="panel-title">Selected listings</div>
+      <div class="tray-info">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2c6ecb"/><path d="M12 11v5M12 8h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        <div>
+          <div class="t1" id="tray-info-title">12 promotions available</div>
+          <div class="t2">Apply to a listing below to get premium placement and increased visibility.</div>
+        </div>
+      </div>
+      <div class="chip-grid" id="chip-grid"></div>
+      <div class="tray-actions" id="tray-actions" style="display:none;">
+        <button class="more-toggle hidden" id="more-toggle" onclick="toggleMore()"></button>
+        <button class="btn btn-secondary" onclick="openModal('modal-clear')">Clear all</button>
+        <button class="btn btn-primary" id="promote-btn" onclick="goEnhance()">Continue with 0 listings</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div>
+        <div class="panel-title">Select listings for promotion</div>
+        <div class="panel-sub" id="avail-sub">12 promotions available</div>
+      </div>
+      <div class="search-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#726a60" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input class="search-input" placeholder="Input text">
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:56px;">Selected</th>
+            <th>Listing</th>
+            <th>List date <span class="arrows">⇅</span></th>
+            <th>Status <span class="arrows">⇅</span></th>
+            <th>Immersive media <span class="arrows">⇅</span></th>
+            <th>Completeness <span class="arrows">⇅</span></th>
+          </tr>
+        </thead>
+        <tbody id="listings-body"></tbody>
+      </table>
+      <div class="pagination">
+        <button class="pg active">1</button><button class="pg">2</button><button class="pg">3</button>
+        <button class="pg">4</button><button class="pg">5</button><button class="pg">•••</button>
+        <button class="pg">30</button><button class="pg">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW 2: ENHANCE ===== -->
+  <div class="view" id="view-enhance">
+    <div class="panel">
+      <div>
+        <div class="panel-title">Enhance your listings with immersive media</div>
+        <div class="panel-sub">Listings with immersive media give buyers AI walkthroughs, virtual staging, and renovation views — the full Spotlight experience.</div>
+      </div>
+
+      <!-- Mode-specific banner -->
+      <div class="enhance-banner soft" id="enhance-banner-soft">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2c6ecb"/><path d="M12 11v5M12 8h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        <div><span class="bold">Immersive media is optional.</span> You can promote now and add it anytime — when it's ready it publishes automatically to your already-live promotion. We'll email you when each one is ready to review.</div>
+      </div>
+      <div class="enhance-banner hard hidden" id="enhance-banner-hard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3l9 16H3L12 3z" fill="#e6a700"/><path d="M12 9v5M12 16.5v.5" stroke="#1a1816" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <div><span class="bold">Immersive media is required to launch.</span> Every promoted listing needs immersive media for the full Spotlight experience. Add media to each listing below before continuing.</div>
+      </div>
+
+      <div id="enhance-rows" style="display:flex; flex-direction:column; gap:12px;"></div>
+
+      <div class="step-foot">
+        <span class="step-summary" id="enhance-summary"></span>
+        <div style="display:flex; gap:16px; align-items:center;">
+          <button class="btn btn-secondary" onclick="goSelect()">Back</button>
+          <button class="btn btn-primary" id="enhance-continue" onclick="goConfirm()">Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW 3: CONFIRM ===== -->
+  <div class="view" id="view-confirm">
+    <div class="panel">
+      <div class="panel-title">Confirm &amp; launch</div>
+      <div class="summary-split">
+        <div class="summary-stat"><div class="n" id="cf-total">0</div><div class="l">listings to promote</div></div>
+        <div class="summary-stat ready"><div class="n" id="cf-ready">0</div><div class="l">with immersive media</div></div>
+        <div class="summary-stat missing"><div class="n" id="cf-missing">0</div><div class="l">promoting without media</div></div>
+      </div>
+      <div class="tray-info" id="cf-note">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2c6ecb"/><path d="M12 11v5M12 8h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        <div><div class="t2" id="cf-note-text"></div></div>
+      </div>
+      <div class="chip-grid" id="cf-chips"></div>
+      <div class="step-foot">
+        <span class="step-summary">Promotions start within 24 hours and run until <strong>Jan 12, 2026</strong>, or until the listing goes off the market.</span>
+        <div style="display:flex; gap:16px; align-items:center;">
+          <button class="btn btn-secondary" onclick="goEnhance()">Back</button>
+          <button class="btn btn-primary" id="launch-btn" onclick="launchPromotions()">Launch promotions</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Clear all modal -->
+<div class="overlay" id="modal-clear">
+  <div class="dialog">
+    <div class="dialog-head">
+      <h2>Clear all selections?</h2>
+      <button class="dialog-close" onclick="closeModal('modal-clear')"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1a1816" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+    </div>
+    <div class="dialog-body">This will remove all listings you've selected for promotion. You can select them again at any time.</div>
+    <div class="dialog-foot">
+      <button class="btn-link" onclick="closeModal('modal-clear')">Go back</button>
+      <button class="btn btn-primary" onclick="clearAll()">Clear all</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add media (simulated upload) modal -->
+<div class="overlay" id="modal-addmedia">
+  <div class="dialog wide">
+    <div class="dialog-head">
+      <h2 id="am-title">Add immersive media</h2>
+      <button class="dialog-close" onclick="closeModal('modal-addmedia')"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1a1816" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+    </div>
+    <div class="dialog-body">For this prototype, "uploading" simulates selecting your immersive media photos for <strong id="am-addr"></strong>. After upload we'll generate the experience and email you when it's ready to review.</div>
+    <div class="enhance-banner soft" style="margin:0;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2c6ecb"/><path d="M12 11v5M12 8h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      <div>Minimum 5 photos, maximum 11. Your existing MLS listing photos won't be affected.</div>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn-link" onclick="closeModal('modal-addmedia')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmAddMedia()">Upload photos &amp; generate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var AVAILABLE = 12;
+  var mode = 'soft'; // 'soft' | 'hard'
+
+  // media: 'ready' | 'generating' | 'none'
+  var LISTINGS = [
+    { id:1, addr:'456 Maple Drive', city:'Dallas, TX 75201', price:'$2,450,000', date:'10/15/2025', ago:'61 days ago', comp:88, photo:'assets/sample-front-of-house.png', media:'ready' },
+    { id:2, addr:'789 Oak Street', city:'Houston, TX 77002', price:'$500,000', date:'9/22/2025', ago:'84 days ago', comp:88, photo:'assets/sample-yard.png', media:'none' },
+    { id:3, addr:'321 Pine Avenue', city:'San Antonio, TX 78205', price:'$875,000', date:'11/08/2025', ago:'37 days ago', comp:72, photo:'assets/sample-living-room.png', media:'generating' },
+    { id:4, addr:'555 Elm Boulevard', city:'Fort Worth, TX 76102', price:'$1,250,000', date:'10/28/2025', ago:'48 days ago', comp:80, photo:'assets/sample-kitchen.png', media:'none' },
+    { id:5, addr:'42 Beachfront Way', city:'Galveston, TX 77550', price:'$923,000', date:'9/15/2025', ago:'91 days ago', comp:90, photo:'assets/sample-bedroom.png', media:'ready' },
+    { id:6, addr:'890 Willow Creek', city:'Plano, TX 75024', price:'$675,000', date:'10/05/2025', ago:'71 days ago', comp:85, photo:'assets/sample-bathroom.png', media:'none' },
+    { id:7, addr:'234 Ranch Road', city:'Frisco, TX 75034', price:'$1,595,000', date:'11/18/2025', ago:'27 days ago', comp:60, photo:'assets/sample-front-of-house.png', media:'none' }
+  ];
+
+  var selected = [];
+  var skipped = {};        // id -> true if explicitly skipped (soft mode)
+  var expanded = false;
+  var pendingMediaId = null;
+
+  function byId(id){ return LISTINGS.filter(function(l){return l.id===id;})[0]; }
+  function checkSvg(){ return '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-6"/></svg>'; }
+
+  function mediaBadge(media) {
+    if (media === 'ready') return '<span class="media-badge ready"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Ready</span>';
+    if (media === 'generating') return '<span class="media-badge generating"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Generating</span>';
+    return '<span class="media-badge none">Not added</span>';
+  }
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById('mode-soft').classList.toggle('active', m==='soft');
+    document.getElementById('mode-hard').classList.toggle('active', m==='hard');
+    document.getElementById('enhance-banner-soft').classList.toggle('hidden', m!=='soft');
+    document.getElementById('enhance-banner-hard').classList.toggle('hidden', m!=='hard');
+    // reset to start for a clean comparison
+    selected = []; skipped = {}; expanded = false;
+    goSelect();
+    renderTable(); renderTray();
+  }
+  window.setMode = setMode;
+
+  /* ---------- VIEW 1: SELECT ---------- */
+  function renderTable() {
+    var body = document.getElementById('listings-body');
+    body.innerHTML = '';
+    LISTINGS.forEach(function(l) {
+      var isSel = selected.indexOf(l.id) !== -1;
+      var atMax = selected.length >= AVAILABLE && !isSel;
+      var tr = document.createElement('tr');
+      if (isSel) tr.className = 'selected';
+      tr.innerHTML =
+        '<td><div class="cbox '+(isSel?'checked':'')+(atMax?' disabled':'')+'" onclick="'+(atMax?'':'toggleSelect('+l.id+')')+'">'+checkSvg()+'</div></td>'+
+        '<td><div class="cell-listing"><img src="'+l.photo+'">'+
+          '<div><div class="cell-addr">'+l.addr+'</div><div class="cell-addr" style="font-weight:400;font-size:13px;">'+l.city+'</div><div class="cell-price">'+l.price+'</div></div></div></td>'+
+        '<td><div class="cell-date">'+l.date+'<div class="ago">'+l.ago+'</div></div></td>'+
+        '<td><span class="badge-active">Active</span></td>'+
+        '<td>'+mediaBadge(l.media)+'</td>'+
+        '<td><div style="font-size:14px;">'+l.comp+'% complete</div></td>';
+      body.appendChild(tr);
+    });
+  }
+
+  function renderTray() {
+    var info=document.getElementById('tray-info-title');
+    var grid=document.getElementById('chip-grid');
+    var actions=document.getElementById('tray-actions');
+    var moreToggle=document.getElementById('more-toggle');
+    var promoteBtn=document.getElementById('promote-btn');
+    var availSub=document.getElementById('avail-sub');
+    grid.innerHTML='';
+    if (selected.length===0){ info.textContent=AVAILABLE+' promotions available'; actions.style.display='none'; availSub.textContent=AVAILABLE+' promotions available'; return; }
+    info.textContent=selected.length+' of '+AVAILABLE+' promotions selected';
+    availSub.textContent=selected.length+' of '+AVAILABLE+' promotions selected';
+    actions.style.display='flex';
+    promoteBtn.textContent='Continue with '+selected.length+' listing'+(selected.length>1?'s':'');
+    var visibleIds = expanded ? selected : selected.slice(0,3);
+    var single = selected.length===1;
+    visibleIds.forEach(function(id){
+      var l=byId(id); var chip=document.createElement('div'); chip.className='chip';
+      var rm = single ? '<button class="chip-remove" onclick="toggleSelect('+id+')">Remove</button>'
+        : '<button class="chip-x" onclick="toggleSelect('+id+')"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#1a1816" stroke-width="1.6" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>';
+      chip.innerHTML='<img src="'+l.photo+'"><div class="chip-text"><span class="chip-addr">'+l.addr+'</span><span class="chip-city">'+l.city+'</span></div>'+rm;
+      grid.appendChild(chip);
+    });
+    if (selected.length>3){ moreToggle.classList.remove('hidden');
+      moreToggle.innerHTML = expanded ? 'Show less' : (selected.length-3)+' additional selections';
+    } else moreToggle.classList.add('hidden');
+  }
+
+  window.toggleSelect=function(id){
+    var i=selected.indexOf(id);
+    if(i===-1){ if(selected.length>=AVAILABLE) return; selected.push(id); }
+    else selected.splice(i,1);
+    renderTable(); renderTray();
+  };
+  window.toggleMore=function(){ expanded=!expanded; renderTray(); };
+  window.clearAll=function(){ selected=[]; expanded=false; closeModal('modal-clear'); renderTable(); renderTray(); };
+
+  /* ---------- VIEW 2: ENHANCE ---------- */
+  // listings that need attention = selected AND media === 'none'
+  function needsMedia(){ return selected.map(byId).filter(function(l){ return l.media==='none'; }); }
+
+  function renderEnhance() {
+    var wrap=document.getElementById('enhance-rows');
+    wrap.innerHTML='';
+    // Show all selected listings, grouped: ones needing media are actionable; ready/generating shown as informational
+    selected.map(byId).forEach(function(l){
+      var row=document.createElement('div');
+      var isSkipped = !!skipped[l.id];
+      row.className='enhance-row'+(l.media==='none'&&!isSkipped?'':(l.media!=='none'?' added':''))+(isSkipped?' skipped':'');
+      var actions='';
+      if (l.media==='ready' || l.media==='generating') {
+        actions='<div class="er-actions"><span class="skip-link" style="text-decoration:none;cursor:default;color:var(--text-alt);">No action needed</span></div>';
+      } else if (isSkipped) {
+        actions='<div class="er-actions"><button class="btn btn-secondary btn-sm" onclick="addMedia('+l.id+')">Add media</button></div>';
+      } else {
+        // none, not skipped
+        var skipBtn = mode==='soft' ? '<button class="skip-link" onclick="skipMedia('+l.id+')">Promote without media</button>' : '';
+        actions='<div class="er-actions">'+skipBtn+'<button class="btn btn-primary btn-sm" onclick="addMedia('+l.id+')">Add immersive media</button></div>';
+      }
+      var statusLine = isSkipped ? '<span class="media-badge none">Will promote without media</span>' : mediaBadge(l.media);
+      row.innerHTML='<img src="'+l.photo+'"><div class="er-text"><div class="er-addr">'+l.addr+'</div><div class="er-city">'+l.city+'</div><div class="er-status">'+statusLine+'</div></div>'+actions;
+      wrap.appendChild(row);
+    });
+    // summary + continue gating
+    var pending = needsMedia().filter(function(l){ return !skipped[l.id]; });
+    var summary=document.getElementById('enhance-summary');
+    var cont=document.getElementById('enhance-continue');
+    if (mode==='hard') {
+      if (pending.length>0){ cont.classList.add('disabled'); cont.textContent='Add media to '+pending.length+' more';
+        summary.textContent=pending.length+' listing'+(pending.length>1?'s':'')+' still need immersive media before you can launch.'; }
+      else { cont.classList.remove('disabled'); cont.textContent='Continue'; summary.textContent='All listings have immersive media. Ready to launch.'; }
+    } else {
+      cont.classList.remove('disabled'); cont.textContent='Continue';
+      var skips=needsMedia().filter(function(l){ return skipped[l.id]; }).length;
+      summary.textContent=(pending.length>0? pending.length+' listing'+(pending.length>1?'s':'')+' without media — add now or promote without.' : (skips>0? skips+' will promote without media.' : 'All set.'));
+    }
+  }
+
+  window.addMedia=function(id){
+    pendingMediaId=id;
+    var l=byId(id);
+    document.getElementById('am-addr').textContent=l.addr;
+    openModal('modal-addmedia');
+  };
+  window.confirmAddMedia=function(){
+    var l=byId(pendingMediaId);
+    if(l){ l.media='generating'; delete skipped[l.id]; }
+    closeModal('modal-addmedia');
+    renderEnhance(); renderTable();
+  };
+  window.skipMedia=function(id){ skipped[id]=true; renderEnhance(); };
+
+  /* ---------- NAV ---------- */
+  function setStep(n){
+    [1,2,3].forEach(function(i){
+      var el=document.getElementById('st-'+i);
+      el.classList.toggle('active', i===n);
+      el.classList.toggle('done', i<n);
+    });
+  }
+  function showView(id){ document.querySelectorAll('.view').forEach(function(v){v.classList.remove('show');}); document.getElementById(id).classList.add('show'); window.scrollTo(0,0); }
+
+  window.goSelect=function(){ setStep(1); showView('view-select'); };
+  window.goEnhance=function(){ if(selected.length===0) return; setStep(2); renderEnhance(); showView('view-enhance'); };
+  window.goConfirm=function(){
+    if(document.getElementById('enhance-continue').classList.contains('disabled')) return;
+    setStep(3); renderConfirm(); showView('view-confirm');
+  };
+  window.onBack=function(){ var cur=document.querySelector('.view.show').id;
+    if(cur==='view-confirm') goEnhance(); else if(cur==='view-enhance') goSelect(); };
+
+  /* ---------- VIEW 3: CONFIRM ---------- */
+  function renderConfirm(){
+    var sel=selected.map(byId);
+    var ready=sel.filter(function(l){return l.media!=='none';}).length;
+    var missing=sel.length-ready;
+    document.getElementById('cf-total').textContent=sel.length;
+    document.getElementById('cf-ready').textContent=ready;
+    document.getElementById('cf-missing').textContent=missing;
+    var noteText=document.getElementById('cf-note-text');
+    if(missing===0){ noteText.innerHTML='Every listing has immersive media — buyers get the full Spotlight experience from day one.'; }
+    else { noteText.innerHTML='<strong>'+missing+'</strong> listing'+(missing>1?'s':'')+' will promote with existing photos. You can add immersive media anytime — it publishes automatically when ready.'; }
+    var grid=document.getElementById('cf-chips'); grid.innerHTML='';
+    sel.forEach(function(l){ var chip=document.createElement('div'); chip.className='chip';
+      chip.innerHTML='<img src="'+l.photo+'"><div class="chip-text"><span class="chip-addr">'+l.addr+'</span><span class="chip-city">'+mediaBadge(l.media==='none'?'none':l.media).replace(/<[^>]+>/g,'').trim()+'</span></div>';
+      grid.appendChild(chip);
+    });
+  }
+
+  window.launchPromotions=function(){
+    var n=selected.length;
+    var generating=selected.map(byId).filter(function(l){return l.media==='generating';}).length;
+    var msg=n+' promotion'+(n>1?'s':'')+' created. They start within 24 hours.';
+    if(generating>0) msg+=' '+generating+' immersive experience'+(generating>1?'s are':' is')+' generating — we\'ll email you when ready to review.';
+    document.getElementById('success-toast-text').textContent=msg;
+    document.getElementById('success-toast').classList.remove('hidden');
+    selected=[]; skipped={}; expanded=false;
+    goSelect(); renderTable(); renderTray();
+  };
+
+  window.openModal=function(id){document.getElementById(id).classList.add('open');};
+  window.closeModal=function(id){document.getElementById(id).classList.remove('open');};
+  ['modal-clear','modal-addmedia'].forEach(function(id){ document.getElementById(id).addEventListener('click',function(e){ if(e.target===this) closeModal(id); }); });
+
+  renderTable(); renderTray();
+})();
+</script>
+
+</body>
+</html>
