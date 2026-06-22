@@ -164,6 +164,57 @@
   .view { display: none; }
   .view.show { display: flex; flex-direction: column; gap: 24px; }
   .hidden { display: none !important; }
+
+  /* ── Upload modal (full immersive-media upload as a modal) ── */
+  .upload-dialog { background: white; border-radius: 16px; width: 880px; max-height: 90vh; box-shadow: 0 8px 24px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; }
+  .ud-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 24px 28px 16px; border-bottom: 1px solid var(--border-base); }
+  .ud-header h2 { font-size: 24px; font-weight: 800; line-height: 30px; letter-spacing: -0.3px; }
+  .ud-header .ud-sub { font-size: 14px; color: var(--text-alt); margin-top: 4px; }
+  .ud-body { padding: 24px 28px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
+  .ud-foot { display: flex; gap: 16px; justify-content: flex-end; align-items: center; padding: 16px 28px; border-top: 1px solid var(--border-base); }
+
+  .inline-bubble { background: var(--bg-alt); border-radius: 16px; padding: 16px; display: flex; gap: 16px; align-items: center; }
+  .inline-bubble .ib-content { flex: 1; }
+  .inline-bubble .t1 { font-size: 15px; font-weight: 700; line-height: 22px; }
+  .inline-bubble .t2 { font-size: 14px; font-weight: 400; line-height: 20px; color: var(--text-alt); }
+  .opt-toggle { background: var(--success); border-radius: 40px; height: 32px; width: 70px; display: flex; align-items: center; gap: 8px; padding: 4px 4px 4px 12px; cursor: pointer; flex-shrink: 0; }
+  .opt-toggle .label { color: white; font-size: 14px; font-weight: 600; }
+  .opt-toggle .knob { width: 24px; height: 24px; border-radius: 50%; background: white; }
+  .opt-toggle.off { background: var(--border-secondary); flex-direction: row-reverse; padding: 4px 12px 4px 4px; }
+
+  .dropzone { border: 2px dashed var(--border-base); border-radius: 8px; padding: 32px 24px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: border-color .2s, background .2s; }
+  .dropzone:hover, .dropzone.dragover { border-color: var(--primary); background: var(--bg-alt); }
+  .dropzone .dz-main { font-size: 15px; }
+  .dropzone .dz-main .browse { font-weight: 700; text-decoration: underline; }
+  .dropzone .dz-sub { font-size: 13px; color: var(--text-alt); margin-top: 4px; }
+
+  .ud-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ud-grid-item { width: 158px; height: 105px; border-radius: 8px; overflow: hidden; position: relative; }
+  .ud-grid-item img { width: 100%; height: 100%; object-fit: cover; }
+  .ud-grid-item .del { position: absolute; bottom: 6px; right: 6px; width: 32px; height: 32px; background: rgba(26,24,22,0.72); border-radius: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+  .ud-grid-item .tag { position: absolute; top: 6px; left: 6px; background: var(--primary); color: white; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 40px; }
+  .ud-count { font-size: 13px; }
+  .ud-count .pc2 { color: var(--text-alt); margin-top: 2px; }
+
+  /* T&C step */
+  .tc-box { background: var(--bg-alt); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .tc-box h3 { font-size: 15px; font-weight: 700; }
+  .tc-box p { font-size: 15px; line-height: 23px; }
+  .tc-box p .bold { font-weight: 700; }
+  .tc-box a { color: #3377cc; font-weight: 600; text-decoration: underline; }
+  .check-row { border: 1px solid var(--border-base); border-radius: 8px; padding: 16px; display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .check-row .box { width: 18px; height: 18px; margin-top: 3px; border: 1.5px solid var(--border-secondary); border-radius: 4px; background: white; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .check-row.checked .box { background: var(--primary); border-color: var(--primary); }
+  .check-row .box svg { display: none; }
+  .check-row.checked .box svg { display: block; }
+  .check-row .label { font-size: 15px; font-weight: 600; line-height: 22px; }
+
+  /* Publishing progress */
+  .pub-preview { width: 100%; height: 200px; border-radius: 8px; background: var(--bg-alt); overflow: hidden; }
+  .pub-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .pub-status { font-size: 15px; font-weight: 600; margin-top: 16px; }
+  .progress-track { background: var(--bg-alt); border-radius: 40px; height: 8px; overflow: hidden; margin-top: 12px; }
+  .progress-fill { height: 8px; background: var(--success); border-radius: 40px; width: 0%; transition: width .4s ease; }
 </style>
 </head>
 <body>
@@ -323,21 +374,67 @@
   </div>
 </div>
 
-<!-- Add media (simulated upload) modal -->
+<!-- Add media — full upload flow as a modal -->
 <div class="overlay" id="modal-addmedia">
-  <div class="dialog wide">
-    <div class="dialog-head">
-      <h2 id="am-title">Add immersive media</h2>
-      <button class="dialog-close" onclick="closeModal('modal-addmedia')"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1a1816" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+  <div class="upload-dialog">
+    <div class="ud-header">
+      <div>
+        <h2>Immersive media photos</h2>
+        <div class="ud-sub">Upload your selected photos for <strong id="am-addr"></strong>.</div>
+      </div>
+      <button class="dialog-close" onclick="closeAddMedia()"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1a1816" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
     </div>
-    <div class="dialog-body">For this prototype, "uploading" simulates selecting your immersive media photos for <strong id="am-addr"></strong>. After upload we'll generate the experience and email you when it's ready to review.</div>
-    <div class="enhance-banner soft" style="margin:0;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2c6ecb"/><path d="M12 11v5M12 8h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
-      <div>Minimum 5 photos, maximum 11. Your existing MLS listing photos won't be affected.</div>
+
+    <!-- STEP A: upload -->
+    <div class="ud-body" id="ud-step-upload">
+      <div class="inline-bubble">
+        <div class="ib-content">
+          <div class="t1">Automatically optimize my photos</div>
+          <div class="t2">Conservative enhancements only (lighting, color, geometry). On by default.</div>
+        </div>
+        <div class="opt-toggle" id="opt-toggle" onclick="toggleOptimize(event)"><span class="label">On</span><span class="knob"></span></div>
+      </div>
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('ud-file').click()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1816" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>
+        <div class="dz-main">Drag and drop your file(s) here or <span class="browse">browse files</span></div>
+        <div class="dz-sub">JPG, PNG, HEIC · Max 20MB · Min 1,000px · 5–11 photos</div>
+      </div>
+      <input type="file" id="ud-file" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
+      <div class="ud-grid" id="ud-grid"></div>
+      <div class="ud-count"><div id="ud-count-label">Photos (0)</div><div class="pc2">Minimum 5 photos required (maximum 11)</div></div>
     </div>
-    <div class="dialog-foot">
-      <button class="btn-link" onclick="closeModal('modal-addmedia')">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmAddMedia()">Upload photos &amp; generate</button>
+
+    <!-- STEP B: T&C -->
+    <div class="ud-body hidden" id="ud-step-tc">
+      <p style="font-size:16px;line-height:24px;">To publish your custom photos with immersive media, we need to confirm you're the copyright owner or authorized licensee of your photos.</p>
+      <div class="tc-box">
+        <h3>Terms &amp; Conditions</h3>
+        <p>By accepting, you grant Realtor.com a non-exclusive, worldwide, royalty-free license to use, reproduce, display, and create derivative works of the photos you upload <span class="bold">solely to produce and display enhanced media on your Spotlight Listing detail page.</span></p>
+        <p>You retain full ownership of your original photos. You may revoke this permission at any time from your listing edit page. Full terms in our <a href="#">Photo License Agreement.</a></p>
+      </div>
+      <div class="check-row" id="tc-check" onclick="toggleCheck()">
+        <div class="box"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-6"/></svg></div>
+        <div class="label">I confirm that I am the copyright owner or authorized licensee of all photos I am uploading.</div>
+      </div>
+      <div class="enhance-banner soft" style="margin:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2c6ecb"/><path d="M12 11v5M12 8h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        <div id="tc-publish-note">Once published, this immersive media auto-publishes to your promotion. Your existing MLS listing photos won't be affected.</div>
+      </div>
+    </div>
+
+    <!-- STEP C: publishing -->
+    <div class="ud-body hidden" id="ud-step-publish">
+      <div class="pub-preview"><img id="pub-img" src="" alt=""></div>
+      <div>
+        <div class="pub-status" id="pub-status">Uploading photo 1 of 6</div>
+        <div class="progress-track"><div class="progress-fill" id="pub-fill"></div></div>
+      </div>
+    </div>
+
+    <div class="ud-foot" id="ud-foot">
+      <!-- upload step buttons -->
+      <button class="btn-link" id="ud-cancel" onclick="closeAddMedia()">Cancel</button>
+      <button class="btn btn-primary disabled" id="ud-next" onclick="udNext()">Publish</button>
     </div>
   </div>
 </div>
@@ -483,19 +580,117 @@
     }
   }
 
+  // ---- Upload modal state machine ----
+  var SAMPLE_PHOTOS = ['assets/sample-bedroom.png','assets/sample-kitchen.png','assets/sample-living-room.png','assets/sample-bathroom.png','assets/sample-front-of-house.png','assets/sample-yard.png'];
+  var udPhotos = [];
+  var udStep = 'upload';   // 'upload' | 'tc' | 'publish'
+  var udConfirmed = false;
+  var optimizeOn = true;
+
   window.addMedia=function(id){
     pendingMediaId=id;
     var l=byId(id);
     document.getElementById('am-addr').textContent=l.addr;
+    // reset modal state
+    udPhotos=[]; udConfirmed=false; optimizeOn=true;
+    document.getElementById('opt-toggle').classList.remove('off');
+    document.getElementById('opt-toggle').querySelector('.label').textContent='On';
+    document.getElementById('tc-check').classList.remove('checked');
+    udGoStep('upload');
+    renderUdGrid();
     openModal('modal-addmedia');
   };
-  window.confirmAddMedia=function(){
-    var l=byId(pendingMediaId);
-    if(l){ l.media='generating'; delete skipped[l.id]; }
-    closeModal('modal-addmedia');
-    renderEnhance(); renderTable();
-  };
+
   window.skipMedia=function(id){ skipped[id]=true; renderEnhance(); };
+
+  function udGoStep(step) {
+    udStep = step;
+    document.getElementById('ud-step-upload').classList.toggle('hidden', step!=='upload');
+    document.getElementById('ud-step-tc').classList.toggle('hidden', step!=='tc');
+    document.getElementById('ud-step-publish').classList.toggle('hidden', step!=='publish');
+    var foot=document.getElementById('ud-foot');
+    var next=document.getElementById('ud-next');
+    var cancel=document.getElementById('ud-cancel');
+    if (step==='publish') { foot.style.display='none'; return; }
+    foot.style.display='flex';
+    if (step==='upload') {
+      cancel.textContent='Cancel'; cancel.onclick=closeAddMedia;
+      next.textContent='Publish';
+      next.classList.toggle('disabled', udPhotos.length < 5);
+    } else if (step==='tc') {
+      cancel.textContent='Back'; cancel.onclick=function(){ udGoStep('upload'); };
+      next.textContent='Accept & publish';
+      next.classList.toggle('disabled', !udConfirmed);
+    }
+  }
+
+  window.toggleOptimize=function(e){ e.stopPropagation(); optimizeOn=!optimizeOn;
+    var t=document.getElementById('opt-toggle'); t.classList.toggle('off',!optimizeOn);
+    t.querySelector('.label').textContent=optimizeOn?'On':'Off'; };
+
+  window.handleFiles=function(fileList){
+    var count = fileList && fileList.length ? fileList.length : 1;
+    for (var i=0;i<count;i++){ if(udPhotos.length>=11) break; udPhotos.push(SAMPLE_PHOTOS[udPhotos.length % SAMPLE_PHOTOS.length]); }
+    if (udPhotos.length < 5){ while(udPhotos.length < 6){ udPhotos.push(SAMPLE_PHOTOS[udPhotos.length % SAMPLE_PHOTOS.length]); } }
+    renderUdGrid();
+  };
+  window.removeUdPhoto=function(i){ udPhotos.splice(i,1); renderUdGrid(); };
+
+  function renderUdGrid(){
+    var grid=document.getElementById('ud-grid'); grid.innerHTML='';
+    udPhotos.forEach(function(src,i){
+      var item=document.createElement('div'); item.className='ud-grid-item';
+      item.innerHTML='<img src="'+src+'">'+(i===0?'<span class="tag">Featured</span>':'')+
+        '<button class="del" onclick="removeUdPhoto('+i+')"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h14M8 5V3h4v2M5 5l1 12h8l1-12"/></svg></button>';
+      grid.appendChild(item);
+    });
+    document.getElementById('ud-count-label').textContent='Photos ('+udPhotos.length+')';
+    var next=document.getElementById('ud-next');
+    if (udStep==='upload') next.classList.toggle('disabled', udPhotos.length < 5);
+  }
+
+  window.toggleCheck=function(){ udConfirmed=!udConfirmed;
+    document.getElementById('tc-check').classList.toggle('checked',udConfirmed);
+    document.getElementById('ud-next').classList.toggle('disabled',!udConfirmed); };
+
+  window.udNext=function(){
+    if (document.getElementById('ud-next').classList.contains('disabled')) return;
+    if (udStep==='upload') { udGoStep('tc'); }
+    else if (udStep==='tc') { startPublishing(); }
+  };
+
+  function startPublishing(){
+    udGoStep('publish');
+    var total=udPhotos.length, i=0;
+    function step(){
+      if (i>=total){
+        document.getElementById('pub-status').textContent='Done! Generating your immersive media…';
+        document.getElementById('pub-fill').style.width='100%';
+        setTimeout(function(){
+          var l=byId(pendingMediaId);
+          if(l){ l.media='generating'; delete skipped[l.id]; }
+          closeModal('modal-addmedia');
+          renderEnhance(); renderTable();
+        }, 900);
+        return;
+      }
+      document.getElementById('pub-img').src=udPhotos[i];
+      document.getElementById('pub-status').textContent='Uploading photo '+(i+1)+' of '+total;
+      document.getElementById('pub-fill').style.width=(((i+1)/total)*100)+'%';
+      i++; setTimeout(step, 700);
+    }
+    step();
+  }
+
+  window.closeAddMedia=function(){ if(udStep==='publish') return; closeModal('modal-addmedia'); };
+
+  // dropzone drag & drop
+  (function(){
+    var dz=document.getElementById('dropzone');
+    dz.addEventListener('dragover',function(e){ e.preventDefault(); dz.classList.add('dragover'); });
+    dz.addEventListener('dragleave',function(){ dz.classList.remove('dragover'); });
+    dz.addEventListener('drop',function(e){ e.preventDefault(); dz.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+  })();
 
   /* ---------- NAV ---------- */
   function setStep(n){
@@ -547,7 +742,8 @@
 
   window.openModal=function(id){document.getElementById(id).classList.add('open');};
   window.closeModal=function(id){document.getElementById(id).classList.remove('open');};
-  ['modal-clear','modal-addmedia'].forEach(function(id){ document.getElementById(id).addEventListener('click',function(e){ if(e.target===this) closeModal(id); }); });
+  document.getElementById('modal-clear').addEventListener('click',function(e){ if(e.target===this) closeModal('modal-clear'); });
+  document.getElementById('modal-addmedia').addEventListener('click',function(e){ if(e.target===this) closeAddMedia(); });
 
   renderTable(); renderTray();
 })();
